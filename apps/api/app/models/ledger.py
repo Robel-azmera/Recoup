@@ -5,7 +5,7 @@ from enum import StrEnum
 
 from pydantic import Field
 
-from .common import MinorUnits, RecoupModel
+from .common import CardSummary, MinorUnits, RecoupModel
 
 
 class Payout(RecoupModel):
@@ -33,12 +33,57 @@ class BalanceTxn(RecoupModel):
     net: MinorUnits
     currency: str = "usd"
     source: str | None = None  # ch_ / re_ / dp_ id
+    related_charge_id: str | None = None  # for refunds/disputes: the charge they reverse
     payout_id: str | None = None
     created: datetime
     available_on: datetime
     description: str | None = None
     fee_details: list[FeeDetail] = Field(default_factory=list)
     synced_at: datetime | None = None
+
+
+class RiskSignals(RecoupModel):
+    cvc_check: str | None = None  # pass | fail | unavailable | unchecked
+    address_line1_check: str | None = None
+    address_postal_code_check: str | None = None
+    three_d_secure: str | None = None  # authenticated | attempted | failed | None
+    risk_level: str | None = None  # normal | elevated | highest
+    risk_score: int | None = None
+    network_status: str | None = None
+
+
+class Charge(RecoupModel):
+    """Mirror of a Stripe charge (card data limited to brand + last4)."""
+
+    id: str
+    amount: MinorUnits
+    currency: str = "usd"
+    created: datetime
+    status: str = "succeeded"
+    order_id: str | None = None
+    customer_email: str | None = None
+    customer_name: str | None = None
+    card: CardSummary | None = None
+    risk: RiskSignals = Field(default_factory=RiskSignals)
+    refunded: bool = False
+    amount_refunded: MinorUnits = 0
+    disputed: bool = False
+    payment_intent: str | None = None
+    synced_at: datetime | None = None
+
+
+class EarlyFraudWarning(RecoupModel):
+    id: str
+    charge_id: str
+    order_id: str | None = None
+    fraud_type: str
+    actionable: bool = True
+    amount: MinorUnits = 0
+    currency: str = "usd"
+    status: str = "open"  # open | refund_proposed | refunded | dismissed
+    recommendation: str | None = None
+    proposed_action_id: str | None = None
+    created: datetime
 
 
 class ReconExceptionType(StrEnum):

@@ -1,0 +1,25 @@
+{
+  "id": "ch_1QfixtureCharge001",
+  "object": "charge",
+  "amount": 24900,
+  "amount_refunded": 0,
+  "currency": "usd",
+  "created": 1793534400,
+  "status": "succeeded",
+  "paid": true,
+  "refunded": false,
+  "disputed": true,
+  "metadata": { "order_id": "ord_fixture_1" },
+  "billing_details": { "email": "sara.tadesse1@example.com", "name": "Sara Tadesse" },
+  "payment_intent": "pi_1QfixturePi0001",
+  "payment_method_details": {
+    "type": "card",
+    "card": {
+      "brand": "visa",
+      "last4": "0259",
+      "checks": { "cvc_check": "pass", "address_line1_check": "pass", "address_postal_code_check": "pass" },
+      "three_d_secure": null
+    }
+  },
+  "outcome": { "network_status": "approved_by_network", "risk_level": "normal", "risk_score": 21, "type": "authorized" }
+}

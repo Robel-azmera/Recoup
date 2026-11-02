@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { LayoutDashboard, Menu, Scale, Settings, ShieldAlert, X } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, Scale, Settings, ShieldAlert, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
@@ -52,7 +52,7 @@ function Logo() {
   );
 }
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children, onLogout }: { children: ReactNode; onLogout: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen md:flex">
@@ -99,6 +99,15 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
+            <button
+              type="button"
+              className="btn-secondary h-9 w-9 p-0"
+              onClick={onLogout}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">{children}</main>

@@ -120,7 +120,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Input"
           },
           "level": {
@@ -145,7 +144,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Output"
           },
           "step": {
@@ -161,7 +159,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "description": "Primary object (dispute/run/action id) for per-object feeds",
             "title": "Subject Id"
           },
@@ -174,7 +171,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Tool"
           },
           "ts": {
@@ -283,6 +279,18 @@
             "default": null,
             "title": "Payout Id"
           },
+          "related_charge_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Related Charge Id"
+          },
           "source": {
             "anyOf": [
               {
@@ -384,6 +392,133 @@
         "title": "Channels",
         "type": "object"
       },
+      "Charge": {
+        "description": "Mirror of a Stripe charge (card data limited to brand + last4).",
+        "properties": {
+          "amount": {
+            "description": "Amount in minor units (e.g. cents)",
+            "title": "Amount",
+            "type": "integer"
+          },
+          "amount_refunded": {
+            "default": 0,
+            "description": "Amount in minor units (e.g. cents)",
+            "title": "Amount Refunded",
+            "type": "integer"
+          },
+          "card": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CardSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "created": {
+            "format": "date-time",
+            "title": "Created",
+            "type": "string"
+          },
+          "currency": {
+            "default": "usd",
+            "title": "Currency",
+            "type": "string"
+          },
+          "customer_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Customer Email"
+          },
+          "customer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Customer Name"
+          },
+          "disputed": {
+            "default": false,
+            "title": "Disputed",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order Id"
+          },
+          "payment_intent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Payment Intent"
+          },
+          "refunded": {
+            "default": false,
+            "title": "Refunded",
+            "type": "boolean"
+          },
+          "risk": {
+            "$ref": "#/components/schemas/RiskSignals"
+          },
+          "status": {
+            "default": "succeeded",
+            "title": "Status",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Synced At"
+          }
+        },
+        "required": [
+          "id",
+          "amount",
+          "created"
+        ],
+        "title": "Charge",
+        "type": "object"
+      },
       "ChecklistItem": {
         "properties": {
           "key": {
@@ -403,7 +538,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Note"
           },
           "required": {
@@ -467,6 +601,92 @@
         "title": "Customer",
         "type": "object"
       },
+      "DemoChargeRequest": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "maximum": 500000.0,
+                "minimum": 100.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Minor units",
+            "title": "Amount"
+          },
+          "scenario": {
+            "default": "fraudulent",
+            "enum": [
+              "fraudulent",
+              "product_not_received",
+              "inquiry",
+              "early_fraud_warning"
+            ],
+            "title": "Scenario",
+            "type": "string"
+          }
+        },
+        "title": "DemoChargeRequest",
+        "type": "object"
+      },
+      "DemoChargeResponse": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "integer"
+          },
+          "charge_id": {
+            "title": "Charge Id",
+            "type": "string"
+          },
+          "dispute_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispute Id"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "mock": {
+            "title": "Mock",
+            "type": "boolean"
+          },
+          "order_id": {
+            "title": "Order Id",
+            "type": "string"
+          },
+          "scenario": {
+            "enum": [
+              "fraudulent",
+              "product_not_received",
+              "inquiry",
+              "early_fraud_warning"
+            ],
+            "title": "Scenario",
+            "type": "string"
+          }
+        },
+        "required": [
+          "order_id",
+          "charge_id",
+          "scenario",
+          "amount",
+          "mock",
+          "message"
+        ],
+        "title": "DemoChargeResponse",
+        "type": "object"
+      },
       "Dispute": {
         "properties": {
           "amount": {
@@ -483,7 +703,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Calendar Event Id"
           },
           "card": {
@@ -494,8 +713,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "category": {
             "$ref": "#/components/schemas/DisputeCategory"
@@ -530,7 +748,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Email"
           },
           "due_by": {
@@ -546,8 +763,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "id": {
             "description": "Stripe dispute id (dp_...), also the document id",
@@ -568,7 +784,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Order Id"
           },
           "outcome": {
@@ -579,8 +794,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "reason_code": {
             "title": "Reason Code",
@@ -594,8 +808,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/DisputeStatus",
@@ -621,15 +834,14 @@
           "win_score": {
             "anyOf": [
               {
-                "maximum": 100,
-                "minimum": 0,
+                "maximum": 100.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Win Score"
           }
         },
@@ -740,6 +952,92 @@
         "title": "DraftSentence",
         "type": "object"
       },
+      "EarlyFraudWarning": {
+        "properties": {
+          "actionable": {
+            "default": true,
+            "title": "Actionable",
+            "type": "boolean"
+          },
+          "amount": {
+            "default": 0,
+            "description": "Amount in minor units (e.g. cents)",
+            "title": "Amount",
+            "type": "integer"
+          },
+          "charge_id": {
+            "title": "Charge Id",
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "title": "Created",
+            "type": "string"
+          },
+          "currency": {
+            "default": "usd",
+            "title": "Currency",
+            "type": "string"
+          },
+          "fraud_type": {
+            "title": "Fraud Type",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order Id"
+          },
+          "proposed_action_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Proposed Action Id"
+          },
+          "recommendation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Recommendation"
+          },
+          "status": {
+            "default": "open",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "charge_id",
+          "fraud_type",
+          "created"
+        ],
+        "title": "EarlyFraudWarning",
+        "type": "object"
+      },
       "EvidenceDraft": {
         "properties": {
           "cache_key": {
@@ -751,7 +1049,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Cache Key"
           },
           "citations": {
@@ -783,7 +1080,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Instruction"
           },
           "model": {
@@ -939,6 +1235,19 @@
         "title": "Fulfilment",
         "type": "object"
       },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "env": {
@@ -968,6 +1277,61 @@
           "store"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "LoginRequest": {
+        "properties": {
+          "password": {
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "title": "LoginRequest",
+        "type": "object"
+      },
+      "LoginResponse": {
+        "properties": {
+          "firebase_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firebase Token"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          },
+          "user": {
+            "title": "User",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "user"
+        ],
+        "title": "LoginResponse",
+        "type": "object"
+      },
+      "MeResponse": {
+        "properties": {
+          "user": {
+            "title": "User",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user"
+        ],
+        "title": "MeResponse",
         "type": "object"
       },
       "Message": {
@@ -1625,6 +1989,96 @@
         "title": "ReconRun",
         "type": "object"
       },
+      "RiskSignals": {
+        "properties": {
+          "address_line1_check": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Address Line1 Check"
+          },
+          "address_postal_code_check": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Address Postal Code Check"
+          },
+          "cvc_check": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cvc Check"
+          },
+          "network_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Network Status"
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Risk Level"
+          },
+          "risk_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Risk Score"
+          },
+          "three_d_secure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Three D Secure"
+          }
+        },
+        "title": "RiskSignals",
+        "type": "object"
+      },
       "StripeEvidence": {
         "description": "Text evidence fields accepted by Stripe's disputes.update (file fields excluded).",
         "properties": {
@@ -1637,7 +2091,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Access Activity Log"
           },
           "billing_address": {
@@ -1649,7 +2102,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Billing Address"
           },
           "cancellation_policy_disclosure": {
@@ -1661,7 +2113,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Cancellation Policy Disclosure"
           },
           "cancellation_rebuttal": {
@@ -1673,7 +2124,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Cancellation Rebuttal"
           },
           "customer_email_address": {
@@ -1685,7 +2135,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Email Address"
           },
           "customer_name": {
@@ -1697,7 +2146,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Name"
           },
           "customer_purchase_ip": {
@@ -1709,7 +2157,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Purchase Ip"
           },
           "duplicate_charge_explanation": {
@@ -1721,7 +2168,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Duplicate Charge Explanation"
           },
           "duplicate_charge_id": {
@@ -1733,7 +2179,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Duplicate Charge Id"
           },
           "product_description": {
@@ -1745,7 +2190,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Product Description"
           },
           "refund_policy_disclosure": {
@@ -1757,7 +2201,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Refund Policy Disclosure"
           },
           "refund_refusal_explanation": {
@@ -1769,7 +2212,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Refund Refusal Explanation"
           },
           "service_date": {
@@ -1781,7 +2223,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Service Date"
           },
           "shipping_address": {
@@ -1793,7 +2234,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Shipping Address"
           },
           "shipping_carrier": {
@@ -1805,7 +2245,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Shipping Carrier"
           },
           "shipping_date": {
@@ -1817,7 +2256,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Shipping Date"
           },
           "shipping_tracking_number": {
@@ -1829,7 +2267,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Shipping Tracking Number"
           },
           "uncategorized_text": {
@@ -1841,7 +2278,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Uncategorized Text"
           }
         },
@@ -1878,6 +2314,64 @@
         },
         "title": "Thresholds",
         "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WebhookAck": {
+        "properties": {
+          "received": {
+            "title": "Received",
+            "type": "boolean"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "received",
+          "result"
+        ],
+        "title": "WebhookAck",
+        "type": "object"
       }
     }
   },
@@ -1887,6 +2381,403 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/admin/sync": {
+      "post": {
+        "description": "Pull disputes, payouts and balance transactions from Stripe (idempotent).",
+        "operationId": "sync_now_admin_sync_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "integer"
+                  },
+                  "title": "Response Sync Now Admin Sync Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync Now",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/audit": {
+      "get": {
+        "description": "Polling fallback for the live feed (the web app normally listens to Firestore).",
+        "operationId": "audit_feed_audit_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "subject_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Subject Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditEntry"
+                  },
+                  "title": "Response Audit Feed Audit Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Audit Feed",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "me_auth_me_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Me",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/demo/charges": {
+      "post": {
+        "operationId": "create_demo_charge_demo_charges_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoChargeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoChargeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Demo Charge",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/disputes": {
+      "get": {
+        "description": "All disputes, soonest deadline first.",
+        "operationId": "list_disputes_disputes_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Dispute"
+                  },
+                  "title": "Response List Disputes Disputes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Disputes",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/disputes/{dispute_id}": {
+      "get": {
+        "operationId": "get_dispute_disputes__dispute_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dispute_id",
+            "required": true,
+            "schema": {
+              "title": "Dispute Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dispute"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dispute",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
     "/healthz": {
       "get": {
         "description": "Liveness + which integrations are real (True) vs mocked (False).",
@@ -1906,6 +2797,55 @@
         "summary": "Healthz",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/webhooks/stripe": {
+      "post": {
+        "operationId": "stripe_webhook_webhooks_stripe_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Stripe-Signature",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stripe-Signature"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stripe Webhook",
+        "tags": [
+          "webhooks"
         ]
       }
     }

@@ -11,8 +11,9 @@ from .actions import (
     PolicyCheck,
     ProposedAction,
     Thresholds,
+    WebhookEventRecord,
 )
-from .common import Address, CardSummary, RecoupModel, utcnow
+from .common import Address, CardSummary, RecoupModel, to_doc, utcnow
 from .disputes import (
     ChecklistItem,
     ChecklistStatus,
@@ -27,12 +28,15 @@ from .disputes import (
 )
 from .ledger import (
     BalanceTxn,
+    Charge,
+    EarlyFraudWarning,
     FeeDetail,
     Payout,
     ReconException,
     ReconExceptionStatus,
     ReconExceptionType,
     ReconRun,
+    RiskSignals,
 )
 from .orders import (
     Customer,
@@ -53,6 +57,8 @@ SCHEMA_MODELS: list[type[RecoupModel]] = [
     Message,
     Payout,
     BalanceTxn,
+    Charge,
+    EarlyFraudWarning,
     ReconRun,
     ReconException,
     ProposedAction,
@@ -72,6 +78,7 @@ __all__ = [
     "BalanceTxn",
     "CardSummary",
     "Channels",
+    "Charge",
     "ChecklistItem",
     "ChecklistStatus",
     "Customer",
@@ -80,6 +87,7 @@ __all__ = [
     "DisputeOutcome",
     "DisputeStatus",
     "DraftSentence",
+    "EarlyFraudWarning",
     "EvidenceDraft",
     "FeeDetail",
     "Fulfilment",
@@ -98,7 +106,10 @@ __all__ = [
     "ReconExceptionType",
     "ReconRun",
     "RecoupModel",
+    "RiskSignals",
     "StripeEvidence",
     "Thresholds",
+    "WebhookEventRecord",
+    "to_doc",
     "utcnow",
 ]

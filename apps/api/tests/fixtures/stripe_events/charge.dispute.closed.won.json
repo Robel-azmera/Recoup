@@ -1,0 +1,23 @@
+{
+  "id": "evt_1QdisputeClosed0001",
+  "object": "event",
+  "created": 1793880000,
+  "livemode": false,
+  "type": "charge.dispute.closed",
+  "data": {
+    "object": {
+      "id": "dp_1QfixtureDispute001",
+      "object": "dispute",
+      "amount": 24900,
+      "currency": "usd",
+      "charge": "ch_1QfixtureCharge001",
+      "created": 1793620800,
+      "reason": "fraudulent",
+      "status": "won",
+      "livemode": false,
+      "metadata": {},
+      "evidence": { "uncategorized_text": "winning_evidence" },
+      "evidence_details": { "due_by": 1794484800, "has_evidence": true, "past_due": false, "submission_count": 1 }
+    }
+  }
+}

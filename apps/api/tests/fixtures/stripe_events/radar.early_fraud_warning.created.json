@@ -1,0 +1,18 @@
+{
+  "id": "evt_1QefwCreated000001",
+  "object": "event",
+  "created": 1793620900,
+  "livemode": false,
+  "type": "radar.early_fraud_warning.created",
+  "data": {
+    "object": {
+      "id": "issfr_1QfixtureEfw0001",
+      "object": "radar.early_fraud_warning",
+      "actionable": true,
+      "charge": "ch_1QfixtureCharge001",
+      "created": 1793620900,
+      "fraud_type": "made_with_stolen_card",
+      "livemode": false
+    }
+  }
+}

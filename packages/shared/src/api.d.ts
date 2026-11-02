@@ -4,6 +4,134 @@
  */
 
 export interface paths {
+    "/admin/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sync Now
+         * @description Pull disputes, payouts and balance transactions from Stripe (idempotent).
+         */
+        post: operations["sync_now_admin_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Audit Feed
+         * @description Polling fallback for the live feed (the web app normally listens to Firestore).
+         */
+        get: operations["audit_feed_audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Me */
+        get: operations["me_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo/charges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Demo Charge */
+        post: operations["create_demo_charge_demo_charges_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Disputes
+         * @description All disputes, soonest deadline first.
+         */
+        get: operations["list_disputes_disputes_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes/{dispute_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dispute */
+        get: operations["get_dispute_disputes__dispute_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -18,6 +146,23 @@ export interface paths {
         get: operations["healthz_healthz_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/webhooks/stripe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stripe Webhook */
+        post: operations["stripe_webhook_webhooks_stripe_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -75,11 +220,8 @@ export interface components {
             actor: components["schemas"]["Actor"];
             /** Id */
             id: string;
-            /**
-             * Input
-             * @default null
-             */
-            input: {
+            /** Input */
+            input?: {
                 [key: string]: unknown;
             } | null;
             /**
@@ -91,11 +233,8 @@ export interface components {
             links?: {
                 [key: string]: string;
             };
-            /**
-             * Output
-             * @default null
-             */
-            output: {
+            /** Output */
+            output?: {
                 [key: string]: unknown;
             } | null;
             /** Step */
@@ -103,14 +242,10 @@ export interface components {
             /**
              * Subject Id
              * @description Primary object (dispute/run/action id) for per-object feeds
-             * @default null
              */
-            subject_id: string | null;
-            /**
-             * Tool
-             * @default null
-             */
-            tool: string | null;
+            subject_id?: string | null;
+            /** Tool */
+            tool?: string | null;
             /**
              * Ts
              * Format: date-time
@@ -178,6 +313,11 @@ export interface components {
              */
             payout_id: string | null;
             /**
+             * Related Charge Id
+             * @default null
+             */
+            related_charge_id: string | null;
+            /**
              * Source
              * @default null
              */
@@ -223,17 +363,86 @@ export interface components {
              */
             telegram_chat_id: string | null;
         };
+        /**
+         * Charge
+         * @description Mirror of a Stripe charge (card data limited to brand + last4).
+         */
+        Charge: {
+            /**
+             * Amount
+             * @description Amount in minor units (e.g. cents)
+             */
+            amount: number;
+            /**
+             * Amount Refunded
+             * @description Amount in minor units (e.g. cents)
+             * @default 0
+             */
+            amount_refunded: number;
+            /** @default null */
+            card: components["schemas"]["CardSummary"] | null;
+            /**
+             * Created
+             * Format: date-time
+             */
+            created: string;
+            /**
+             * Currency
+             * @default usd
+             */
+            currency: string;
+            /**
+             * Customer Email
+             * @default null
+             */
+            customer_email: string | null;
+            /**
+             * Customer Name
+             * @default null
+             */
+            customer_name: string | null;
+            /**
+             * Disputed
+             * @default false
+             */
+            disputed: boolean;
+            /** Id */
+            id: string;
+            /**
+             * Order Id
+             * @default null
+             */
+            order_id: string | null;
+            /**
+             * Payment Intent
+             * @default null
+             */
+            payment_intent: string | null;
+            /**
+             * Refunded
+             * @default false
+             */
+            refunded: boolean;
+            risk?: components["schemas"]["RiskSignals"];
+            /**
+             * Status
+             * @default succeeded
+             */
+            status: string;
+            /**
+             * Synced At
+             * @default null
+             */
+            synced_at: string | null;
+        };
         /** ChecklistItem */
         ChecklistItem: {
             /** Key */
             key: string;
             /** Label */
             label: string;
-            /**
-             * Note
-             * @default null
-             */
-            note: string | null;
+            /** Note */
+            note?: string | null;
             /**
              * Required
              * @default false
@@ -262,6 +471,40 @@ export interface components {
              */
             risky: boolean;
         };
+        /** DemoChargeRequest */
+        DemoChargeRequest: {
+            /**
+             * Amount
+             * @description Minor units
+             */
+            amount?: number | null;
+            /**
+             * Scenario
+             * @default fraudulent
+             * @enum {string}
+             */
+            scenario: "fraudulent" | "product_not_received" | "inquiry" | "early_fraud_warning";
+        };
+        /** DemoChargeResponse */
+        DemoChargeResponse: {
+            /** Amount */
+            amount: number;
+            /** Charge Id */
+            charge_id: string;
+            /** Dispute Id */
+            dispute_id?: string | null;
+            /** Message */
+            message: string;
+            /** Mock */
+            mock: boolean;
+            /** Order Id */
+            order_id: string;
+            /**
+             * Scenario
+             * @enum {string}
+             */
+            scenario: "fraudulent" | "product_not_received" | "inquiry" | "early_fraud_warning";
+        };
         /** Dispute */
         Dispute: {
             /**
@@ -269,13 +512,9 @@ export interface components {
              * @description Amount in minor units (e.g. cents)
              */
             amount: number;
-            /**
-             * Calendar Event Id
-             * @default null
-             */
-            calendar_event_id: string | null;
-            /** @default null */
-            card: components["schemas"]["CardSummary"] | null;
+            /** Calendar Event Id */
+            calendar_event_id?: string | null;
+            card?: components["schemas"]["CardSummary"] | null;
             category: components["schemas"]["DisputeCategory"];
             /** Charge Id */
             charge_id: string;
@@ -291,18 +530,14 @@ export interface components {
              * @default usd
              */
             currency: string;
-            /**
-             * Customer Email
-             * @default null
-             */
-            customer_email: string | null;
+            /** Customer Email */
+            customer_email?: string | null;
             /**
              * Due By
              * Format: date-time
              */
             due_by: string;
-            /** @default null */
-            evidence_draft: components["schemas"]["EvidenceDraft"] | null;
+            evidence_draft?: components["schemas"]["EvidenceDraft"] | null;
             /**
              * Id
              * @description Stripe dispute id (dp_...), also the document id
@@ -313,17 +548,12 @@ export interface components {
              * @default false
              */
             livemode: boolean;
-            /**
-             * Order Id
-             * @default null
-             */
-            order_id: string | null;
-            /** @default null */
-            outcome: components["schemas"]["DisputeOutcome"] | null;
+            /** Order Id */
+            order_id?: string | null;
+            outcome?: components["schemas"]["DisputeOutcome"] | null;
             /** Reason Code */
             reason_code: string;
-            /** @default null */
-            recommendation: components["schemas"]["Recommendation"] | null;
+            recommendation?: components["schemas"]["Recommendation"] | null;
             /** @default needs_response */
             status: components["schemas"]["DisputeStatus"];
             /**
@@ -338,11 +568,8 @@ export interface components {
             updated_at: string;
             /** Win Rationale */
             win_rationale?: string[];
-            /**
-             * Win Score
-             * @default null
-             */
-            win_score: number | null;
+            /** Win Score */
+            win_score?: number | null;
         };
         /**
          * DisputeCategory
@@ -390,13 +617,60 @@ export interface components {
             /** Text */
             text: string;
         };
-        /** EvidenceDraft */
-        EvidenceDraft: {
+        /** EarlyFraudWarning */
+        EarlyFraudWarning: {
             /**
-             * Cache Key
+             * Actionable
+             * @default true
+             */
+            actionable: boolean;
+            /**
+             * Amount
+             * @description Amount in minor units (e.g. cents)
+             * @default 0
+             */
+            amount: number;
+            /** Charge Id */
+            charge_id: string;
+            /**
+             * Created
+             * Format: date-time
+             */
+            created: string;
+            /**
+             * Currency
+             * @default usd
+             */
+            currency: string;
+            /** Fraud Type */
+            fraud_type: string;
+            /** Id */
+            id: string;
+            /**
+             * Order Id
              * @default null
              */
-            cache_key: string | null;
+            order_id: string | null;
+            /**
+             * Proposed Action Id
+             * @default null
+             */
+            proposed_action_id: string | null;
+            /**
+             * Recommendation
+             * @default null
+             */
+            recommendation: string | null;
+            /**
+             * Status
+             * @default open
+             */
+            status: string;
+        };
+        /** EvidenceDraft */
+        EvidenceDraft: {
+            /** Cache Key */
+            cache_key?: string | null;
             /**
              * Citations
              * @description sentence id -> source record ids.
@@ -410,11 +684,8 @@ export interface components {
              * Format: date-time
              */
             generated_at: string;
-            /**
-             * Instruction
-             * @default null
-             */
-            instruction: string | null;
+            /** Instruction */
+            instruction?: string | null;
             /** Model */
             model: string;
             /** Sentences */
@@ -475,6 +746,11 @@ export interface components {
              */
             tracking: string | null;
         };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** HealthResponse */
         HealthResponse: {
             /** Env */
@@ -487,6 +763,25 @@ export interface components {
             status: string;
             /** Store */
             store: string;
+        };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Password */
+            password: string;
+        };
+        /** LoginResponse */
+        LoginResponse: {
+            /** Firebase Token */
+            firebase_token?: string | null;
+            /** Token */
+            token: string;
+            /** User */
+            user: string;
+        };
+        /** MeResponse */
+        MeResponse: {
+            /** User */
+            user: string;
         };
         /** Message */
         Message: {
@@ -816,101 +1111,85 @@ export interface components {
              */
             total_settled: number;
         };
+        /** RiskSignals */
+        RiskSignals: {
+            /**
+             * Address Line1 Check
+             * @default null
+             */
+            address_line1_check: string | null;
+            /**
+             * Address Postal Code Check
+             * @default null
+             */
+            address_postal_code_check: string | null;
+            /**
+             * Cvc Check
+             * @default null
+             */
+            cvc_check: string | null;
+            /**
+             * Network Status
+             * @default null
+             */
+            network_status: string | null;
+            /**
+             * Risk Level
+             * @default null
+             */
+            risk_level: string | null;
+            /**
+             * Risk Score
+             * @default null
+             */
+            risk_score: number | null;
+            /**
+             * Three D Secure
+             * @default null
+             */
+            three_d_secure: string | null;
+        };
         /**
          * StripeEvidence
          * @description Text evidence fields accepted by Stripe's disputes.update (file fields excluded).
          */
         StripeEvidence: {
-            /**
-             * Access Activity Log
-             * @default null
-             */
-            access_activity_log: string | null;
-            /**
-             * Billing Address
-             * @default null
-             */
-            billing_address: string | null;
-            /**
-             * Cancellation Policy Disclosure
-             * @default null
-             */
-            cancellation_policy_disclosure: string | null;
-            /**
-             * Cancellation Rebuttal
-             * @default null
-             */
-            cancellation_rebuttal: string | null;
-            /**
-             * Customer Email Address
-             * @default null
-             */
-            customer_email_address: string | null;
-            /**
-             * Customer Name
-             * @default null
-             */
-            customer_name: string | null;
-            /**
-             * Customer Purchase Ip
-             * @default null
-             */
-            customer_purchase_ip: string | null;
-            /**
-             * Duplicate Charge Explanation
-             * @default null
-             */
-            duplicate_charge_explanation: string | null;
-            /**
-             * Duplicate Charge Id
-             * @default null
-             */
-            duplicate_charge_id: string | null;
-            /**
-             * Product Description
-             * @default null
-             */
-            product_description: string | null;
-            /**
-             * Refund Policy Disclosure
-             * @default null
-             */
-            refund_policy_disclosure: string | null;
-            /**
-             * Refund Refusal Explanation
-             * @default null
-             */
-            refund_refusal_explanation: string | null;
-            /**
-             * Service Date
-             * @default null
-             */
-            service_date: string | null;
-            /**
-             * Shipping Address
-             * @default null
-             */
-            shipping_address: string | null;
-            /**
-             * Shipping Carrier
-             * @default null
-             */
-            shipping_carrier: string | null;
-            /**
-             * Shipping Date
-             * @default null
-             */
-            shipping_date: string | null;
-            /**
-             * Shipping Tracking Number
-             * @default null
-             */
-            shipping_tracking_number: string | null;
-            /**
-             * Uncategorized Text
-             * @default null
-             */
-            uncategorized_text: string | null;
+            /** Access Activity Log */
+            access_activity_log?: string | null;
+            /** Billing Address */
+            billing_address?: string | null;
+            /** Cancellation Policy Disclosure */
+            cancellation_policy_disclosure?: string | null;
+            /** Cancellation Rebuttal */
+            cancellation_rebuttal?: string | null;
+            /** Customer Email Address */
+            customer_email_address?: string | null;
+            /** Customer Name */
+            customer_name?: string | null;
+            /** Customer Purchase Ip */
+            customer_purchase_ip?: string | null;
+            /** Duplicate Charge Explanation */
+            duplicate_charge_explanation?: string | null;
+            /** Duplicate Charge Id */
+            duplicate_charge_id?: string | null;
+            /** Product Description */
+            product_description?: string | null;
+            /** Refund Policy Disclosure */
+            refund_policy_disclosure?: string | null;
+            /** Refund Refusal Explanation */
+            refund_refusal_explanation?: string | null;
+            /** Service Date */
+            service_date?: string | null;
+            /** Shipping Address */
+            shipping_address?: string | null;
+            /** Shipping Carrier */
+            shipping_carrier?: string | null;
+            /** Shipping Date */
+            shipping_date?: string | null;
+            /** Shipping Tracking Number */
+            shipping_tracking_number?: string | null;
+            /** Uncategorized Text */
+            uncategorized_text?: string | null;
         };
         /** Thresholds */
         Thresholds: {
@@ -940,6 +1219,26 @@ export interface components {
              */
             max_refund_amount: number;
         };
+        /** ValidationError */
+        ValidationError: {
+            /** Context */
+            ctx?: Record<string, never>;
+            /** Input */
+            input?: unknown;
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
+        /** WebhookAck */
+        WebhookAck: {
+            /** Received */
+            received: boolean;
+            /** Result */
+            result: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -949,6 +1248,236 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    sync_now_admin_sync_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    audit_feed_audit_get: {
+        parameters: {
+            query?: {
+                subject_id?: string | null;
+                limit?: number;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEntry"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    me_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_demo_charge_demo_charges_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoChargeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoChargeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_disputes_disputes_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dispute"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_dispute_disputes__dispute_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                dispute_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dispute"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     healthz_healthz_get: {
         parameters: {
             query?: never;
@@ -965,6 +1494,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    stripe_webhook_webhooks_stripe_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Stripe-Signature"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookAck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

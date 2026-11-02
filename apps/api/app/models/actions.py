@@ -98,3 +98,14 @@ class AppSettings(RecoupModel):
     thresholds: Thresholds = Field(default_factory=Thresholds)
     auto_policies: AutoPolicies = Field(default_factory=AutoPolicies)
     channels: Channels = Field(default_factory=Channels)
+
+
+class WebhookEventRecord(RecoupModel):
+    """Dedupe record, keyed by Stripe event.id."""
+
+    id: str
+    type: str
+    received_at: datetime
+    status: str = "processing"  # processing | processed | ignored | failed
+    error: str | None = None
+    source: str = "stripe"  # stripe | mock

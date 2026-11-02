@@ -1,0 +1,25 @@
+{
+  "id": "evt_1QdisputeCreated0001",
+  "object": "event",
+  "api_version": "2024-10-28.acacia",
+  "created": 1793620800,
+  "livemode": false,
+  "type": "charge.dispute.created",
+  "data": {
+    "object": {
+      "id": "dp_1QfixtureDispute001",
+      "object": "dispute",
+      "amount": 24900,
+      "currency": "usd",
+      "charge": "ch_1QfixtureCharge001",
+      "created": 1793620800,
+      "reason": "fraudulent",
+      "status": "needs_response",
+      "is_charge_refundable": false,
+      "livemode": false,
+      "metadata": {},
+      "evidence": {},
+      "evidence_details": { "due_by": 1794484800, "has_evidence": false, "past_due": false, "submission_count": 0 }
+    }
+  }
+}

@@ -15,6 +15,7 @@ class Settings(BaseSettings):
 
     firestore_project_id: str = "demo-recoup"
     firestore_emulator_host: str = ""
+    firebase_auth_emulator_host: str = ""
     # "firestore" (emulator or real) or "memory" (tests / no emulator)
     store_backend: Literal["firestore", "memory"] = "firestore"
 

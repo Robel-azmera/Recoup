@@ -48,7 +48,7 @@ async def test_memory_store_create_is_idempotent() -> None:
     s = MemoryStore()
     assert await s.create("webhook_events", "evt_1", {"a": 1}) is True
     assert await s.create("webhook_events", "evt_1", {"a": 2}) is False
-    assert (await s.get("webhook_events", "evt_1")) == {"a": 1}
+    assert (await s.get("webhook_events", "evt_1")) == {"a": 1, "id": "evt_1"}
     await s.set("disputes", "dp_1", {"amount": 5, "status": "x"})
     await s.set("disputes", "dp_2", {"amount": 9, "status": "x"})
     rows = await s.query("disputes", [("amount", ">", 6)])

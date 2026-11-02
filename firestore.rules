@@ -1,10 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // The web app reads live collections (audit_log, disputes, recon_exceptions) directly.
+    // The web app opens live listeners on these collections. It signs in with a Firebase
+    // custom token minted by the API at login, which carries {admin: true}.
     // All writes go through the API (firebase-admin bypasses rules).
+    function isAdmin() { return request.auth != null && request.auth.token.admin == true; }
+
     match /{collection}/{doc} {
-      allow read: if collection in ['audit_log', 'disputes', 'recon_exceptions', 'recon_runs', 'proposed_actions'];
+      allow read: if isAdmin() && collection in
+        ['audit_log', 'disputes', 'recon_exceptions', 'recon_runs', 'proposed_actions', 'fraud_warnings'];
       allow write: if false;
     }
     match /{document=**} { allow read, write: if false; }

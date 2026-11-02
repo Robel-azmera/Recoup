@@ -1,12 +1,18 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { Layout } from './components/Layout';
+import { useAuth } from './hooks/useAuth';
+import { Login } from './pages/Login';
 import { Overview } from './pages/Overview';
 import { Placeholder } from './pages/Placeholder';
+import { Settings } from './pages/Settings';
 
 export default function App() {
+  const { token, login, logout } = useAuth();
+  if (!token) return <Login onLogin={login} />;
+
   return (
-    <Layout>
+    <Layout onLogout={logout}>
       <Routes>
         <Route path="/" element={<Overview />} />
         <Route path="/disputes" element={<Placeholder title="Disputes" phase="Phase 3" />} />
@@ -18,7 +24,7 @@ export default function App() {
           path="/reconciliation"
           element={<Placeholder title="Reconciliation" phase="Phase 4" />}
         />
-        <Route path="/settings" element={<Placeholder title="Settings" phase="Phase 1" />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Placeholder title="Not found" phase="never" />} />
       </Routes>
     </Layout>

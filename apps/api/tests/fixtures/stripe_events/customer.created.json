@@ -1,0 +1,8 @@
+{
+  "id": "evt_1QunhandledType0001",
+  "object": "event",
+  "created": 1793620950,
+  "livemode": false,
+  "type": "customer.created",
+  "data": { "object": { "id": "cus_fixture", "object": "customer" } }
+}

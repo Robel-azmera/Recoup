@@ -1,59 +1,45 @@
 import { useQuery } from '@tanstack/react-query';
-import clsx from 'clsx';
-import { PlugZap } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import { EmptyState } from '../components/EmptyState';
-import { getHealth } from '../lib/api';
+import { ActivityFeed } from '../components/ActivityFeed';
+import { IntegrationStatus } from '../components/IntegrationStatus';
+import { listDisputes } from '../lib/api';
+import { formatMoney } from '../lib/format';
 
 export function Overview() {
-  const health = useQuery({ queryKey: ['health'], queryFn: getHealth });
+  const disputes = useQuery({ queryKey: ['disputes'], queryFn: listDisputes });
+  const open = disputes.data?.filter((d) => !['won', 'lost', 'accepted'].includes(d.status)) ?? [];
+  const atRisk = open.reduce((s, d) => s + d.amount, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold">Overview</h1>
-        <p className="text-sm text-slate-500">KPIs and the live agent feed arrive in Phase 6.</p>
+        <p className="text-sm text-slate-500">Full KPI dashboard arrives in Phase 6.</p>
       </div>
-
-      <section className="card p-4" aria-labelledby="integrations-heading">
-        <h2 id="integrations-heading" className="mb-3 text-sm font-semibold">
-          Integrations
-        </h2>
-        {health.isLoading && (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="skeleton h-9" />
-            ))}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link to="/disputes" className="card p-4 transition hover:border-brand-500">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <ShieldAlert className="h-4 w-4" aria-hidden /> Open disputes
           </div>
-        )}
-        {health.isError && (
-          <EmptyState icon={PlugZap} title="API unreachable">
-            Start the API with <code className="font-mono">honcho start</code> and refresh.
-          </EmptyState>
-        )}
-        {health.data && (
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {Object.entries(health.data.integrations).map(([name, real]) => (
-              <li
-                key={name}
-                className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-800"
-              >
-                <span className="capitalize">{name.replace('_', ' ')}</span>
-                <span
-                  className={clsx(
-                    'rounded-full px-2 py-0.5 text-xs font-medium',
-                    real
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
-                      : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
-                  )}
-                >
-                  {real ? 'live' : 'mock'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {disputes.isLoading ? (
+            <div className="skeleton mt-2 h-8 w-16" />
+          ) : (
+            <div className="tabular mt-1 text-2xl font-semibold">{open.length}</div>
+          )}
+        </Link>
+        <div className="card p-4">
+          <div className="text-sm text-slate-500">$ at risk</div>
+          {disputes.isLoading ? (
+            <div className="skeleton mt-2 h-8 w-28" />
+          ) : (
+            <div className="tabular mt-1 text-2xl font-semibold">{formatMoney(atRisk)}</div>
+          )}
+        </div>
+      </div>
+      <ActivityFeed />
+      <IntegrationStatus />
     </div>
   );
 }

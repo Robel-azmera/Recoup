@@ -76,7 +76,7 @@ class MemoryStore:
 
     async def get(self, collection: str, doc_id: str) -> Doc | None:
         doc = self._col(collection).get(doc_id)
-        return copy.deepcopy(doc) if doc is not None else None
+        return {**copy.deepcopy(doc), "id": doc_id} if doc is not None else None
 
     async def set(self, collection: str, doc_id: str, data: Doc, merge: bool = False) -> None:
         col = self._col(collection)
@@ -108,7 +108,12 @@ class MemoryStore:
         descending: bool = False,
         limit: int | None = None,
     ) -> list[Doc]:
-        docs = [d for d in self._col(collection).values() if all(_match(d, f) for f in filters)]
+        # Like Firestore's FirestoreStore.query: every result carries its document id.
+        docs = [
+            {**d, "id": k}
+            for k, d in self._col(collection).items()
+            if all(_match({**d, "id": k}, f) for f in filters)
+        ]
         if order_by:
             docs.sort(key=lambda d: (d.get(order_by) is None, d.get(order_by)), reverse=descending)
         if limit is not None:
@@ -125,21 +130,11 @@ class FirestoreStore:
     def _db(self) -> Any:
         """Lazily initialise firebase-admin so importing the app never needs credentials."""
         if self._client is None:
-            import os
+            from firebase_admin import firestore
 
-            import firebase_admin
-            from firebase_admin import credentials, firestore
+            from .firebase import firebase_app
 
-            try:
-                app = firebase_admin.get_app()
-            except ValueError:
-                cred: Any = (
-                    _EmulatorCredential()
-                    if os.environ.get("FIRESTORE_EMULATOR_HOST")
-                    else credentials.ApplicationDefault()
-                )
-                app = firebase_admin.initialize_app(cred, {"projectId": self._project_id})
-            self._client = firestore.client(app)
+            self._client = firestore.client(firebase_app(self._project_id))
         return self._client
 
     def _query_sync(
@@ -200,17 +195,3 @@ class FirestoreStore:
         return await run_in_threadpool(
             self._query_sync, collection, filters, order_by, descending, limit
         )
-
-
-class _EmulatorCredential:
-    """firebase-admin credential that skips Google auth when talking to the emulator."""
-
-    def __new__(cls) -> Any:
-        from firebase_admin import credentials
-        from google.auth.credentials import AnonymousCredentials
-
-        class _Cred(credentials.Base):  # type: ignore[misc]
-            def get_credential(self) -> Any:
-                return AnonymousCredentials()  # type: ignore[no-untyped-call]
-
-        return _Cred()

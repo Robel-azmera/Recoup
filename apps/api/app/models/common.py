@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,7 +8,13 @@ MinorUnits = Annotated[int, Field(description="Amount in minor units (e.g. cents
 
 
 def utcnow() -> datetime:
-    return datetime.now(UTC)
+    """UTC now, truncated to whole seconds so stored ISO strings sort lexicographically."""
+    return datetime.now(UTC).replace(microsecond=0)
+
+
+def to_doc(model: BaseModel) -> dict[str, Any]:
+    """Serialise a model for storage: JSON mode (ISO-8601 UTC datetimes, enum values)."""
+    return model.model_dump(mode="json")
 
 
 class RecoupModel(BaseModel):
