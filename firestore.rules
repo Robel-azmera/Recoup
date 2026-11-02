@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The web app reads live collections (audit_log, disputes, recon_exceptions) directly.
+    // All writes go through the API (firebase-admin bypasses rules).
+    match /{collection}/{doc} {
+      allow read: if collection in ['audit_log', 'disputes', 'recon_exceptions', 'recon_runs', 'proposed_actions'];
+      allow write: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
