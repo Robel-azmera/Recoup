@@ -392,7 +392,8 @@ class MockStripe:
                 "evidence_details": {
                     # Real Stripe sets this; the mock spreads deadlines over 2-11 days
                     # (deterministic per order) so the deadline list and sweep have variety.
-                    "due_by": ts + _mock_due_days(metadata.get("order_id", charge["id"])) * 86400,
+                    "due_by": ts
+                    + _mock_due_days(metadata.get("order_id") or str(charge["id"])) * 86400,
                     "has_evidence": False,
                     "past_due": False,
                     "submission_count": 0,

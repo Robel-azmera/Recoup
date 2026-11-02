@@ -35,7 +35,9 @@ async def post_event(client: AsyncClient, name: str) -> dict[str, str]:
     return body
 
 
-async def test_dispute_created_is_ingested_and_linked(client: AsyncClient, seeded: Container) -> None:
+async def test_dispute_created_is_ingested_and_linked(
+    client: AsyncClient, seeded: Container
+) -> None:
     assert (await post_event(client, "charge.dispute.created"))["result"] == "processed"
 
     d = await seeded.disputes.get("dp_1QfixtureDispute001")
