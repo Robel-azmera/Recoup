@@ -8,7 +8,7 @@ from .config import Settings, get_settings
 from .deps import Container, build_container
 from .logging import configure_logging
 from .models import SCHEMA_MODELS
-from .routers import admin, auth, demo, disputes, health, webhooks
+from .routers import actions, admin, auth, demo, disputes, health, webhooks
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -24,7 +24,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for r in (health, auth, webhooks, disputes, demo, admin):
+    for r in (health, auth, webhooks, disputes, actions, demo, admin):
         app.include_router(r.router)
 
     def custom_openapi() -> dict[str, Any]:

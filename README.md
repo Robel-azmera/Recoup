@@ -11,7 +11,7 @@ Money moves only after a person approves it.
 - Spec: [`docs/SOLUTION_DESIGN.md`](docs/SOLUTION_DESIGN.md)
 - Decisions log: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
-> Status: **Phase 1 (seed + Stripe)**. This README grows with each phase.
+> Status: **Phase 2 (agent core)**. This README grows with each phase.
 
 ## Layout
 
@@ -71,4 +71,16 @@ Without a key, an in-memory mock Stripe fires the same events through the same p
 |---|---|
 | New dispute (W1 intake) | Settings → Demo Console → *Fraudulent dispute*, *Product not received* or *Inquiry*. Or `POST /demo/charges {"scenario":"fraudulent"}` |
 | Early fraud warning (W2 intake) | Demo Console → *Early fraud warning* |
+| Draft / regenerate evidence (W1) | Automatic on every new dispute. Regenerate: `POST /disputes/{id}/draft {"instruction":"stress the delivery photo"}` |
+| Approve an action | `GET /actions/{id}` returns a 30-minute approval token bound to you and the payload hash; `POST /actions/{id}/approve {"approval_token": ...}` |
 | Stripe sync | Demo Console → *Sync from Stripe now*, or `POST /admin/sync` |
+
+## Agent design (short)
+
+`webhook → DisputeService.ingest → TaskRunner → DisputeAgent.draft`
+
+1. **Tool loop:** at most 8 calls to the read-only tools in `app/tools/registry.py`. Every call is written to `audit_log`.
+2. **Checklist + baseline score:** deterministic evaluators from the category playbook (`app/playbooks/`).
+3. **Structured analysis:** Gemini with a Pydantic response schema. Its score is clamped to the baseline ±20.
+4. **Grounding check** (`app/agent/grounding.py`): every sentence must cite tool records that contain its facts.
+5. **ProposedAction** (`submit_dispute_evidence` or `accept_dispute`). Only `app/policy/gate.py` executes writes, after token verification, rule checks and an execution lock.

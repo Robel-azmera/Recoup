@@ -4,6 +4,74 @@
  */
 
 export interface paths {
+    "/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Actions */
+        get: operations["list_actions_actions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/actions/{action_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Action */
+        get: operations["get_action_actions__action_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/actions/{action_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve */
+        post: operations["approve_actions__action_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/actions/{action_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject */
+        post: operations["reject_actions__action_id__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/sync": {
         parameters: {
             query?: never;
@@ -132,6 +200,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/disputes/{dispute_id}/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Draft
+         * @description (Re)generate the evidence draft, optionally with an analyst instruction. Runs in the
+         *     background; the UI follows progress via the audit feed.
+         */
+        post: operations["draft_disputes__dispute_id__draft_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes/{dispute_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edit Evidence
+         * @description Analyst edits. Unchanged sentences keep their citations; new text is marked as written
+         *     by the analyst (they attest to it). The submit action is re-proposed with a new hash, so
+         *     an approval of the old text can't be reused.
+         */
+        put: operations["edit_evidence_disputes__dispute_id__evidence_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/disputes/{dispute_id}/propose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Propose
+         * @description Analyst overrides the recommendation (fight anyway / accept the loss). Still goes
+         *     through the gate and still needs an approval.
+         */
+        post: operations["propose_disputes__dispute_id__propose_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -183,6 +315,12 @@ export interface components {
          * @enum {string}
          */
         ActionType: "submit_dispute_evidence" | "accept_dispute" | "refund_charge" | "create_calendar_event" | "send_email" | "send_telegram";
+        /** ActionView */
+        ActionView: {
+            action: components["schemas"]["ProposedAction"];
+            /** Approval Token */
+            approval_token?: string | null;
+        };
         /**
          * Actor
          * @enum {string}
@@ -196,24 +334,24 @@ export interface components {
             country: string;
             /** Line1 */
             line1: string;
-            /**
-             * Line2
-             * @default null
-             */
-            line2: string | null;
+            /** Line2 */
+            line2?: string | null;
             /** Postal Code */
             postal_code: string;
-            /**
-             * State
-             * @default null
-             */
-            state: string | null;
+            /** State */
+            state?: string | null;
         };
         /** AppSettings */
         AppSettings: {
             auto_policies?: components["schemas"]["AutoPolicies"];
             channels?: components["schemas"]["Channels"];
+            demo?: components["schemas"]["DemoSettings"];
             thresholds?: components["schemas"]["Thresholds"];
+        };
+        /** ApproveRequest */
+        ApproveRequest: {
+            /** Approval Token */
+            approval_token: string;
         };
         /** AuditEntry */
         AuditEntry: {
@@ -505,6 +643,17 @@ export interface components {
              */
             scenario: "fraudulent" | "product_not_received" | "inquiry" | "early_fraud_warning";
         };
+        /**
+         * DemoSettings
+         * @description Test mode only: append Stripe's magic evidence value so submitted disputes close.
+         */
+        DemoSettings: {
+            /**
+             * Force Test Outcome
+             * @default won
+             */
+            force_test_outcome: ("won" | "lost") | null;
+        };
         /** Dispute */
         Dispute: {
             /**
@@ -512,6 +661,8 @@ export interface components {
              * @description Amount in minor units (e.g. cents)
              */
             amount: number;
+            /** Baseline Score */
+            baseline_score?: number | null;
             /** Calendar Event Id */
             calendar_event_id?: string | null;
             card?: components["schemas"]["CardSummary"] | null;
@@ -551,6 +702,8 @@ export interface components {
             /** Order Id */
             order_id?: string | null;
             outcome?: components["schemas"]["DisputeOutcome"] | null;
+            /** Proposed Action Id */
+            proposed_action_id?: string | null;
             /** Reason Code */
             reason_code: string;
             recommendation?: components["schemas"]["Recommendation"] | null;
@@ -576,6 +729,15 @@ export interface components {
          * @enum {string}
          */
         DisputeCategory: "fraudulent" | "product_not_received" | "product_unacceptable" | "duplicate" | "subscription_canceled" | "credit_not_processed" | "general";
+        /** DisputeDetail */
+        DisputeDetail: {
+            /** Actions */
+            actions: components["schemas"]["ProposedAction"][];
+            dispute: components["schemas"]["Dispute"];
+            /** Messages */
+            messages: components["schemas"]["Message"][];
+            order: components["schemas"]["Order"] | null;
+        };
         /** DisputeOutcome */
         DisputeOutcome: {
             /**
@@ -601,11 +763,32 @@ export interface components {
          * @enum {string}
          */
         DisputeStatus: "needs_response" | "drafting" | "awaiting_approval" | "submitted" | "accepted" | "won" | "lost";
+        /** DraftAccepted */
+        DraftAccepted: {
+            /** Dispute Id */
+            dispute_id: string;
+            /** Status */
+            status: string;
+        };
+        /** DraftRequest */
+        DraftRequest: {
+            /** Instruction */
+            instruction?: string | null;
+        };
         /**
          * DraftSentence
          * @description One claim in the rebuttal and the tool-result records that support it.
+         *
+         *     author: agent (LLM), system (copied verbatim from a record), user (analyst edit; the
+         *     analyst attests to it, so it does not need a citation).
          */
         DraftSentence: {
+            /**
+             * Author
+             * @default agent
+             * @enum {string}
+             */
+            author: "agent" | "system" | "user";
             /** Field */
             field: string;
             /** Id */
@@ -616,6 +799,8 @@ export interface components {
             readonly supported: boolean;
             /** Text */
             text: string;
+            /** Unsupported Reason */
+            unsupported_reason?: string | null;
         };
         /** EarlyFraudWarning */
         EarlyFraudWarning: {
@@ -672,12 +857,19 @@ export interface components {
             /** Cache Key */
             cache_key?: string | null;
             /**
+             * Cached
+             * @default false
+             */
+            cached: boolean;
+            /**
              * Citations
              * @description sentence id -> source record ids.
              */
             readonly citations: {
                 [key: string]: string[];
             };
+            /** Edited By */
+            edited_by?: string | null;
             evidence: components["schemas"]["StripeEvidence"];
             /**
              * Generated At
@@ -686,12 +878,24 @@ export interface components {
             generated_at: string;
             /** Instruction */
             instruction?: string | null;
+            /** Missing Evidence */
+            missing_evidence?: string[];
             /** Model */
             model: string;
             /** Sentences */
             sentences?: components["schemas"]["DraftSentence"][];
             /** Unsupported Sentence Ids */
             readonly unsupported_sentence_ids: string[];
+        };
+        /** EvidenceEdit */
+        EvidenceEdit: {
+            /**
+             * Fields
+             * @description Stripe evidence field -> full new text
+             */
+            fields: {
+                [key: string]: string;
+            };
         };
         /** FeeDetail */
         FeeDetail: {
@@ -710,41 +914,20 @@ export interface components {
         };
         /** Fulfilment */
         Fulfilment: {
-            /**
-             * Carrier
-             * @default null
-             */
-            carrier: string | null;
-            /**
-             * Delivered At
-             * @default null
-             */
-            delivered_at: string | null;
-            /**
-             * Delivered To Billing Address
-             * @default null
-             */
-            delivered_to_billing_address: boolean | null;
-            /**
-             * Proof Url
-             * @default null
-             */
-            proof_url: string | null;
-            /**
-             * Shipped At
-             * @default null
-             */
-            shipped_at: string | null;
-            /**
-             * Signed By
-             * @default null
-             */
-            signed_by: string | null;
-            /**
-             * Tracking
-             * @default null
-             */
-            tracking: string | null;
+            /** Carrier */
+            carrier?: string | null;
+            /** Delivered At */
+            delivered_at?: string | null;
+            /** Delivered To Billing Address */
+            delivered_to_billing_address?: boolean | null;
+            /** Proof Url */
+            proof_url?: string | null;
+            /** Shipped At */
+            shipped_at?: string | null;
+            /** Signed By */
+            signed_by?: string | null;
+            /** Tracking */
+            tracking?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -811,15 +994,10 @@ export interface components {
         MessageDirection: "inbound" | "outbound";
         /** Order */
         Order: {
-            /** @default null */
-            billing_address: components["schemas"]["Address"] | null;
-            /** @default null */
-            card: components["schemas"]["CardSummary"] | null;
-            /**
-             * Charge Id
-             * @default null
-             */
-            charge_id: string | null;
+            billing_address?: components["schemas"]["Address"] | null;
+            card?: components["schemas"]["CardSummary"] | null;
+            /** Charge Id */
+            charge_id?: string | null;
             /**
              * Created At
              * Format: date-time
@@ -836,19 +1014,14 @@ export interface components {
              * @default false
              */
             digital: boolean;
-            /** @default null */
-            fulfilment: components["schemas"]["Fulfilment"] | null;
+            fulfilment?: components["schemas"]["Fulfilment"] | null;
             /** Id */
             id: string;
-            /**
-             * Ip
-             * @default null
-             */
-            ip: string | null;
+            /** Ip */
+            ip?: string | null;
             /** Items */
             items: components["schemas"]["OrderItem"][];
-            /** @default null */
-            shipping_address: components["schemas"]["Address"] | null;
+            shipping_address?: components["schemas"]["Address"] | null;
             /** @default paid */
             status: components["schemas"]["OrderStatus"];
             /**
@@ -912,48 +1085,38 @@ export interface components {
         };
         /** PolicyCheck */
         PolicyCheck: {
-            /**
-             * Detail
-             * @default null
-             */
-            detail: string | null;
+            /** Detail */
+            detail?: string | null;
             /** Name */
             name: string;
             /** Passed */
             passed: boolean;
         };
+        /** ProposeRequest */
+        ProposeRequest: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "submit" | "accept";
+        };
         /** ProposedAction */
         ProposedAction: {
-            /**
-             * Amount
-             * @default null
-             */
-            amount: number | null;
-            /**
-             * Approved At
-             * @default null
-             */
-            approved_at: string | null;
-            /**
-             * Approved By
-             * @default null
-             */
-            approved_by: string | null;
+            /** Amount */
+            amount?: number | null;
+            /** Approved At */
+            approved_at?: string | null;
+            /** Approved By */
+            approved_by?: string | null;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
-            /**
-             * Error
-             * @default null
-             */
-            error: string | null;
-            /**
-             * Executed At
-             * @default null
-             */
-            executed_at: string | null;
+            /** Error */
+            error?: string | null;
+            /** Executed At */
+            executed_at?: string | null;
             /**
              * Hash
              * @description sha256 of type+target+canonical payload; approval binds to it
@@ -961,11 +1124,8 @@ export interface components {
             hash: string;
             /** Id */
             id: string;
-            /**
-             * Idempotency Key
-             * @default null
-             */
-            idempotency_key: string | null;
+            /** Idempotency Key */
+            idempotency_key?: string | null;
             /** Payload */
             payload: {
                 [key: string]: unknown;
@@ -974,16 +1134,10 @@ export interface components {
             policy_checks?: components["schemas"]["PolicyCheck"][];
             /** @default agent */
             proposed_by: components["schemas"]["Actor"];
-            /**
-             * Reason
-             * @default null
-             */
-            reason: string | null;
-            /**
-             * Result
-             * @default null
-             */
-            result: {
+            /** Reason */
+            reason?: string | null;
+            /** Result */
+            result?: {
                 [key: string]: unknown;
             } | null;
             /** @default proposed */
@@ -1110,6 +1264,11 @@ export interface components {
              * @default 0
              */
             total_settled: number;
+        };
+        /** RejectRequest */
+        RejectRequest: {
+            /** Reason */
+            reason?: string | null;
         };
         /** RiskSignals */
         RiskSignals: {
@@ -1248,6 +1407,146 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_actions_actions_get: {
+        parameters: {
+            query: {
+                target_id: string;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProposedAction"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_action_actions__action_id__get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                action_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_actions__action_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                action_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProposedAction"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_actions__action_id__reject_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                action_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProposedAction"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sync_now_admin_sync_post: {
         parameters: {
             query?: never;
@@ -1464,7 +1763,118 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "application/json": components["schemas"]["DisputeDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    draft_disputes__dispute_id__draft_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                dispute_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftAccepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_evidence_disputes__dispute_id__evidence_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                dispute_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EvidenceEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
                     "application/json": components["schemas"]["Dispute"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    propose_disputes__dispute_id__propose_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                dispute_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProposeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProposedAction"];
                 };
             };
             /** @description Validation Error */

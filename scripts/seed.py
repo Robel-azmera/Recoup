@@ -51,10 +51,16 @@ async def main() -> int:
     if not c.stripe.is_mock:
         await asyncio.sleep(3)  # give Stripe a moment to create the test disputes
         print(f"  sync: {await c.sync.sync_all()}")
+    if c.tasks.pending:
+        print(f"  waiting for the agent to draft {c.tasks.pending} dispute(s) ({c.llm.model_name})...")
+        await c.tasks.drain()
     disputes = await c.disputes.list()
     print(f"  {'disputes':>18}: {len(disputes)}")
     for d in disputes:
-        print(f"    {d.id}  {d.category.value:<22} ${d.amount / 100:>8.2f}  due {d.due_by:%Y-%m-%d}  order={d.order_id}")
+        print(
+            f"    {d.id}  {d.category.value:<22} ${d.amount / 100:>8.2f}  due {d.due_by:%Y-%m-%d}"
+            f"  score={d.win_score} {d.recommendation.value if d.recommendation else '-'}  {d.status.value}"
+        )
     return 0
 
 

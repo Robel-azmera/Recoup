@@ -73,17 +73,25 @@ class StripeEvidence(RecoupModel):
 
 
 class DraftSentence(RecoupModel):
-    """One claim in the rebuttal and the tool-result records that support it."""
+    """One claim in the rebuttal and the tool-result records that support it.
+
+    author: agent (LLM), system (copied verbatim from a record), user (analyst edit; the
+    analyst attests to it, so it does not need a citation).
+    """
 
     id: str
     field: str
     text: str
     source_ids: list[str] = Field(default_factory=list)
+    author: Literal["agent", "system", "user"] = "agent"
+    unsupported_reason: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def supported(self) -> bool:
-        return len(self.source_ids) > 0
+        if self.author == "user":
+            return True
+        return len(self.source_ids) > 0 and self.unsupported_reason is None
 
 
 class EvidenceDraft(RecoupModel):
@@ -93,6 +101,9 @@ class EvidenceDraft(RecoupModel):
     model: str
     generated_at: datetime
     cache_key: str | None = None
+    cached: bool = False
+    missing_evidence: list[str] = Field(default_factory=list)
+    edited_by: str | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -132,6 +143,8 @@ class Dispute(RecoupModel):
     card: CardSummary | None = None
     customer_email: str | None = None
     calendar_event_id: str | None = None
+    baseline_score: int | None = None
+    proposed_action_id: str | None = None
     livemode: bool = False
     created_at: datetime
     updated_at: datetime

@@ -7,14 +7,20 @@ from dataclasses import dataclass
 
 from fastapi import Request
 
+from .agent.dispute_agent import DisputeAgent
+from .agent.llm import LLM, GeminiLLM, RateLimiter
+from .agent.mock_llm import MockLLM
 from .config import Settings
 from .integrations.store import FirestoreStore, MemoryStore, Store
 from .integrations.stripe_gateway import MockStripe, RealStripe, StripeGateway
+from .models import Dispute
+from .policy.gate import PolicyGate
 from .services.audit import AuditLog
 from .services.disputes import DisputeService
 from .services.events import EventProcessor
 from .services.merchant import MerchantData, StoreMerchantData
 from .services.sync import SyncService
+from .services.tasks import TaskRunner
 
 
 @dataclass
@@ -27,9 +33,23 @@ class Container:
     sync: SyncService
     disputes: DisputeService
     events: EventProcessor
+    gate: PolicyGate
+    tasks: TaskRunner
+    llm: LLM
+    agent: DisputeAgent = None  # type: ignore[assignment]  # set right after construction
 
 
-def build_container(settings: Settings, store: Store | None = None) -> Container:
+def build_llm(settings: Settings) -> LLM:
+    if settings.gemini_api_key:
+        return GeminiLLM(
+            settings.gemini_api_key, settings.gemini_model, RateLimiter(settings.gemini_rpm)
+        )
+    return MockLLM()
+
+
+def build_container(
+    settings: Settings, store: Store | None = None, llm: LLM | None = None, auto_draft: bool = True
+) -> Container:
     if store is None:
         if settings.store_backend == "memory":
             store = MemoryStore()
@@ -57,7 +77,7 @@ def build_container(settings: Settings, store: Store | None = None) -> Container
 
         stripe.set_emitter(emit)
 
-    return Container(
+    c = Container(
         settings=settings,
         store=store,
         audit=audit,
@@ -66,7 +86,19 @@ def build_container(settings: Settings, store: Store | None = None) -> Container
         sync=sync,
         disputes=disputes,
         events=events,
+        gate=PolicyGate(store, stripe, audit, settings),
+        tasks=TaskRunner(),
+        llm=llm or build_llm(settings),
     )
+    c.agent = DisputeAgent(c, c.llm)
+
+    if auto_draft:  # W1: every new dispute gets a draft, in the background (webhooks stay fast)
+
+        async def draft_new(d: Dispute) -> None:
+            c.tasks.spawn(c.agent.draft(d.id), name=f"draft:{d.id}")
+
+        disputes.on_created.append(draft_new)
+    return c
 
 
 def get_container(request: Request) -> Container:

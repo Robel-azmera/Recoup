@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -87,6 +87,12 @@ class AutoPolicies(RecoupModel):
     auto_submit_min_score: int | None = None  # None = always human
 
 
+class DemoSettings(RecoupModel):
+    """Test mode only: append Stripe's magic evidence value so submitted disputes close."""
+
+    force_test_outcome: Literal["won", "lost"] | None = "won"
+
+
 class Channels(RecoupModel):
     telegram_chat_id: str | None = None
     owner_email: str | None = None
@@ -98,6 +104,7 @@ class AppSettings(RecoupModel):
     thresholds: Thresholds = Field(default_factory=Thresholds)
     auto_policies: AutoPolicies = Field(default_factory=AutoPolicies)
     channels: Channels = Field(default_factory=Channels)
+    demo: DemoSettings = Field(default_factory=DemoSettings)
 
 
 class WebhookEventRecord(RecoupModel):

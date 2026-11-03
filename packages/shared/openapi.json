@@ -25,6 +25,29 @@
         "title": "ActionType",
         "type": "string"
       },
+      "ActionView": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ProposedAction"
+          },
+          "approval_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Token"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ActionView",
+        "type": "object"
+      },
       "Actor": {
         "enum": [
           "agent",
@@ -57,7 +80,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Line2"
           },
           "postal_code": {
@@ -73,7 +95,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "State"
           }
         },
@@ -94,11 +115,27 @@
           "channels": {
             "$ref": "#/components/schemas/Channels"
           },
+          "demo": {
+            "$ref": "#/components/schemas/DemoSettings"
+          },
           "thresholds": {
             "$ref": "#/components/schemas/Thresholds"
           }
         },
         "title": "AppSettings",
+        "type": "object"
+      },
+      "ApproveRequest": {
+        "properties": {
+          "approval_token": {
+            "title": "Approval Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "approval_token"
+        ],
+        "title": "ApproveRequest",
         "type": "object"
       },
       "AuditEntry": {
@@ -687,12 +724,46 @@
         "title": "DemoChargeResponse",
         "type": "object"
       },
+      "DemoSettings": {
+        "description": "Test mode only: append Stripe's magic evidence value so submitted disputes close.",
+        "properties": {
+          "force_test_outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "won",
+                  "lost"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "won",
+            "title": "Force Test Outcome"
+          }
+        },
+        "title": "DemoSettings",
+        "type": "object"
+      },
       "Dispute": {
         "properties": {
           "amount": {
             "description": "Amount in minor units (e.g. cents)",
             "title": "Amount",
             "type": "integer"
+          },
+          "baseline_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Score"
           },
           "calendar_event_id": {
             "anyOf": [
@@ -796,6 +867,17 @@
               }
             ]
           },
+          "proposed_action_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposed Action Id"
+          },
           "reason_code": {
             "title": "Reason Code",
             "type": "string"
@@ -871,6 +953,45 @@
         "title": "DisputeCategory",
         "type": "string"
       },
+      "DisputeDetail": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/ProposedAction"
+            },
+            "title": "Actions",
+            "type": "array"
+          },
+          "dispute": {
+            "$ref": "#/components/schemas/Dispute"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Order"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "dispute",
+          "order",
+          "messages",
+          "actions"
+        ],
+        "title": "DisputeDetail",
+        "type": "object"
+      },
       "DisputeOutcome": {
         "properties": {
           "amount_recovered": {
@@ -915,9 +1036,55 @@
         "title": "DisputeStatus",
         "type": "string"
       },
-      "DraftSentence": {
-        "description": "One claim in the rebuttal and the tool-result records that support it.",
+      "DraftAccepted": {
         "properties": {
+          "dispute_id": {
+            "title": "Dispute Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dispute_id",
+          "status"
+        ],
+        "title": "DraftAccepted",
+        "type": "object"
+      },
+      "DraftRequest": {
+        "properties": {
+          "instruction": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          }
+        },
+        "title": "DraftRequest",
+        "type": "object"
+      },
+      "DraftSentence": {
+        "description": "One claim in the rebuttal and the tool-result records that support it.\n\nauthor: agent (LLM), system (copied verbatim from a record), user (analyst edit; the\nanalyst attests to it, so it does not need a citation).",
+        "properties": {
+          "author": {
+            "default": "agent",
+            "enum": [
+              "agent",
+              "system",
+              "user"
+            ],
+            "title": "Author",
+            "type": "string"
+          },
           "field": {
             "title": "Field",
             "type": "string"
@@ -941,6 +1108,17 @@
           "text": {
             "title": "Text",
             "type": "string"
+          },
+          "unsupported_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsupported Reason"
           }
         },
         "required": [
@@ -1051,6 +1229,11 @@
             ],
             "title": "Cache Key"
           },
+          "cached": {
+            "default": false,
+            "title": "Cached",
+            "type": "boolean"
+          },
           "citations": {
             "additionalProperties": {
               "items": {
@@ -1062,6 +1245,17 @@
             "readOnly": true,
             "title": "Citations",
             "type": "object"
+          },
+          "edited_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edited By"
           },
           "evidence": {
             "$ref": "#/components/schemas/StripeEvidence"
@@ -1081,6 +1275,13 @@
               }
             ],
             "title": "Instruction"
+          },
+          "missing_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Evidence",
+            "type": "array"
           },
           "model": {
             "title": "Model",
@@ -1110,6 +1311,23 @@
           "unsupported_sentence_ids"
         ],
         "title": "EvidenceDraft",
+        "type": "object"
+      },
+      "EvidenceEdit": {
+        "properties": {
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Stripe evidence field -> full new text",
+            "title": "Fields",
+            "type": "object"
+          }
+        },
+        "required": [
+          "fields"
+        ],
+        "title": "EvidenceEdit",
         "type": "object"
       },
       "FeeDetail": {
@@ -1154,7 +1372,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Carrier"
           },
           "delivered_at": {
@@ -1167,7 +1384,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Delivered At"
           },
           "delivered_to_billing_address": {
@@ -1179,7 +1395,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Delivered To Billing Address"
           },
           "proof_url": {
@@ -1191,7 +1406,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Proof Url"
           },
           "shipped_at": {
@@ -1204,7 +1418,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Shipped At"
           },
           "signed_by": {
@@ -1216,7 +1429,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Signed By"
           },
           "tracking": {
@@ -1228,7 +1440,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Tracking"
           }
         },
@@ -1398,8 +1609,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "card": {
             "anyOf": [
@@ -1409,8 +1619,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "charge_id": {
             "anyOf": [
@@ -1421,7 +1630,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Charge Id"
           },
           "created_at": {
@@ -1450,8 +1658,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "id": {
             "title": "Id",
@@ -1466,7 +1673,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Ip"
           },
           "items": {
@@ -1484,8 +1690,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/OrderStatus",
@@ -1514,7 +1719,7 @@
             "type": "string"
           },
           "quantity": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Quantity",
             "type": "integer"
           },
@@ -1619,7 +1824,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Detail"
           },
           "name": {
@@ -1638,6 +1842,23 @@
         "title": "PolicyCheck",
         "type": "object"
       },
+      "ProposeRequest": {
+        "properties": {
+          "type": {
+            "enum": [
+              "submit",
+              "accept"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "ProposeRequest",
+        "type": "object"
+      },
       "ProposedAction": {
         "properties": {
           "amount": {
@@ -1650,7 +1871,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Amount"
           },
           "approved_at": {
@@ -1663,7 +1883,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Approved At"
           },
           "approved_by": {
@@ -1675,7 +1894,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Approved By"
           },
           "created_at": {
@@ -1692,7 +1910,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Error"
           },
           "executed_at": {
@@ -1705,7 +1922,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Executed At"
           },
           "hash": {
@@ -1726,7 +1942,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Idempotency Key"
           },
           "payload": {
@@ -1754,7 +1969,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Reason"
           },
           "result": {
@@ -1767,7 +1981,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Result"
           },
           "status": {
@@ -1987,6 +2200,23 @@
           "started_at"
         ],
         "title": "ReconRun",
+        "type": "object"
+      },
+      "RejectRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "RejectRequest",
         "type": "object"
       },
       "RiskSignals": {
@@ -2381,6 +2611,262 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/actions": {
+      "get": {
+        "operationId": "list_actions_actions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "title": "Target Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProposedAction"
+                  },
+                  "title": "Response List Actions Actions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Actions",
+        "tags": [
+          "actions"
+        ]
+      }
+    },
+    "/actions/{action_id}": {
+      "get": {
+        "operationId": "get_action_actions__action_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "title": "Action Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Action",
+        "tags": [
+          "actions"
+        ]
+      }
+    },
+    "/actions/{action_id}/approve": {
+      "post": {
+        "operationId": "approve_actions__action_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "title": "Action Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposedAction"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve",
+        "tags": [
+          "actions"
+        ]
+      }
+    },
+    "/actions/{action_id}/reject": {
+      "post": {
+        "operationId": "reject_actions__action_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "action_id",
+            "required": true,
+            "schema": {
+              "title": "Action Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposedAction"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject",
+        "tags": [
+          "actions"
+        ]
+      }
+    },
     "/admin/sync": {
       "post": {
         "description": "Pull disputes, payouts and balance transactions from Stripe (idempotent).",
@@ -2755,7 +3241,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Dispute"
+                  "$ref": "#/components/schemas/DisputeDetail"
                 }
               }
             },
@@ -2773,6 +3259,213 @@
           }
         },
         "summary": "Get Dispute",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/disputes/{dispute_id}/draft": {
+      "post": {
+        "description": "(Re)generate the evidence draft, optionally with an analyst instruction. Runs in the\nbackground; the UI follows progress via the audit feed.",
+        "operationId": "draft_disputes__dispute_id__draft_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dispute_id",
+            "required": true,
+            "schema": {
+              "title": "Dispute Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Draft",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/disputes/{dispute_id}/evidence": {
+      "put": {
+        "description": "Analyst edits. Unchanged sentences keep their citations; new text is marked as written\nby the analyst (they attest to it). The submit action is re-proposed with a new hash, so\nan approval of the old text can't be reused.",
+        "operationId": "edit_evidence_disputes__dispute_id__evidence_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dispute_id",
+            "required": true,
+            "schema": {
+              "title": "Dispute Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvidenceEdit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dispute"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit Evidence",
+        "tags": [
+          "disputes"
+        ]
+      }
+    },
+    "/disputes/{dispute_id}/propose": {
+      "post": {
+        "description": "Analyst overrides the recommendation (fight anyway / accept the loss). Still goes\nthrough the gate and still needs an approval.",
+        "operationId": "propose_disputes__dispute_id__propose_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dispute_id",
+            "required": true,
+            "schema": {
+              "title": "Dispute Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposedAction"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Propose",
         "tags": [
           "disputes"
         ]
