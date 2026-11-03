@@ -11,6 +11,17 @@ from .agent.dispute_agent import DisputeAgent
 from .agent.llm import LLM, GeminiLLM, RateLimiter
 from .agent.mock_llm import MockLLM
 from .config import Settings
+from .integrations.notify import (
+    CalendarClient,
+    EmailClient,
+    MockCalendar,
+    MockEmail,
+    MockTelegram,
+    RealCalendar,
+    RealEmail,
+    RealTelegram,
+    TelegramClient,
+)
 from .integrations.store import FirestoreStore, MemoryStore, Store
 from .integrations.stripe_gateway import MockStripe, RealStripe, StripeGateway
 from .models import Dispute
@@ -19,6 +30,7 @@ from .services.audit import AuditLog
 from .services.disputes import DisputeService
 from .services.events import EventProcessor
 from .services.merchant import MerchantData, StoreMerchantData
+from .services.notifications import NotificationService
 from .services.sync import SyncService
 from .services.tasks import TaskRunner
 
@@ -37,6 +49,7 @@ class Container:
     tasks: TaskRunner
     llm: LLM
     agent: DisputeAgent = None  # type: ignore[assignment]  # set right after construction
+    notifier: NotificationService = None  # type: ignore[assignment]
 
 
 def build_llm(settings: Settings) -> LLM:
@@ -91,11 +104,30 @@ def build_container(
         llm=llm or build_llm(settings),
     )
     c.agent = DisputeAgent(c, c.llm)
+    s = settings
+    telegram: TelegramClient = (
+        RealTelegram(s.telegram_bot_token)
+        if s.telegram_bot_token and s.telegram_chat_id
+        else MockTelegram(store)
+    )
+    calendar: CalendarClient = (
+        RealCalendar(s.google_calendar_id, s.google_service_account_json)
+        if s.google_calendar_id and s.google_service_account_json
+        else MockCalendar(store)
+    )
+    email: EmailClient = (
+        RealEmail(s.resend_api_key, s.email_from) if s.resend_api_key else MockEmail(store)
+    )
+    c.notifier = NotificationService(c, telegram, calendar, email)
 
     if auto_draft:  # W1: every new dispute gets a draft, in the background (webhooks stay fast)
 
+        async def draft_and_alert(dispute_id: str) -> None:
+            drafted = await c.agent.draft(dispute_id)
+            await c.notifier.dispute_ready(drafted)
+
         async def draft_new(d: Dispute) -> None:
-            c.tasks.spawn(c.agent.draft(d.id), name=f"draft:{d.id}")
+            c.tasks.spawn(draft_and_alert(d.id), name=f"draft:{d.id}")
 
         disputes.on_created.append(draft_new)
     return c

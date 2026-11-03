@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
     telegram_webhook_secret: str = "dev-telegram-secret"
+    # auto: long-polling when running locally with a real token, webhook in prod
+    telegram_mode: Literal["auto", "webhook", "polling", "off"] = "auto"
 
     google_calendar_id: str = ""
     google_service_account_json: str = ""

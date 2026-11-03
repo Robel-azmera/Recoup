@@ -119,3 +119,8 @@ export const updateReconException = (id: string, action: ReconAction, note?: str
     note: note ?? null,
   });
 export const getPayoutViews = () => api<PayoutView[]>('/recon/payouts');
+
+export type OutboxItem = Schemas['OutboxItem'];
+export const getOutbox = () => api<OutboxItem[]>('/notifications/outbox');
+export const pressTelegramButton = (message_id: number, callback_data: string) =>
+  post<{ ok: boolean; result: string }>('/demo/telegram/press', { message_id, callback_data });

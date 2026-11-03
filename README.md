@@ -11,7 +11,7 @@ Money moves only after a person approves it.
 - Spec: [`docs/SOLUTION_DESIGN.md`](docs/SOLUTION_DESIGN.md)
 - Decisions log: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
-> Status: **Phase 4 (W3 reconciliation)**. This README grows with each phase.
+> Status: **Phase 5 (notifications)**. This README grows with each phase.
 
 ## Layout
 
@@ -65,6 +65,26 @@ Each integration runs as a mock until you set its key in `apps/api/.env`. `GET /
 
 Without a key, an in-memory mock Stripe fires the same events through the same pipeline.
 
+### Telegram
+
+1. Create a bot with @BotFather and set `TELEGRAM_BOT_TOKEN`.
+2. Message the bot once, then open `https://api.telegram.org/bot<token>/getUpdates` and copy `message.chat.id` into `TELEGRAM_CHAT_ID`.
+3. Locally the API long-polls, so no public URL is needed. In prod run `scripts/set_telegram_webhook.py https://<api-host>`.
+
+Only callbacks from that chat are accepted. Every button shows the live policy checks first, then approves through the same gate as the web UI.
+
+### Google Calendar
+
+1. Create a service account with the Calendar API enabled and download its JSON key.
+2. Share your calendar with the service account's email ("Make changes to events").
+3. Set `GOOGLE_CALENDAR_ID` and `GOOGLE_SERVICE_ACCOUNT_JSON` (inline JSON or a file path).
+
+### Resend
+
+Set `RESEND_API_KEY`. `onboarding@resend.dev` can send only to your own address until you verify a domain.
+
+Without these keys, everything goes to the **Notification outbox** in Settings, where the Telegram buttons are clickable.
+
 ## Triggering the workflows
 
 | Workflow | How |
@@ -75,6 +95,7 @@ Without a key, an in-memory mock Stripe fires the same events through the same p
 | Draft / regenerate evidence (API) | Automatic on every new dispute. Regenerate: `POST /disputes/{id}/draft {"instruction":"stress the delivery photo"}` |
 | Approve an action | `GET /actions/{id}` returns a 30-minute approval token bound to you and the payload hash; `POST /actions/{id}/approve {"approval_token": ...}` |
 | Reconcile payouts (W3) | Reconciliation → **Run reconciliation now** (or `POST /recon/run`). It finds the 6 planted exceptions, each with an explanation and a suggested action. Resolve, snooze or mark expected; expand a payout to see transaction → order matching. |
+| Approve from Telegram (W1) | Each new dispute sends an alert with **Approve & submit / Edit / Accept loss**. A tap shows the policy checks; **Confirm** executes through the gate. With mocks, use Settings → Notification outbox. A Calendar event is created at `due_by − 48h`. |
 | Stripe sync | Demo Console → *Sync from Stripe now*, or `POST /admin/sync` |
 
 ## Agent design (short)

@@ -1,3 +1,6 @@
+import asyncio
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager, suppress
 from typing import Any
 
 from fastapi import FastAPI
@@ -8,14 +11,27 @@ from .config import Settings, get_settings
 from .deps import Container, build_container
 from .logging import configure_logging
 from .models import SCHEMA_MODELS
-from .routers import actions, admin, auth, demo, disputes, health, recon, webhooks
+from .routers import actions, admin, auth, demo, disputes, health, recon, telegram, webhooks
+from .services.telegram_poller import poll_forever, polling_enabled
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging()
-    app = FastAPI(title="Recoup API", version="0.1.0")
-    app.state.container = container or build_container(settings)
+    c = container or build_container(settings)
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+        poller = asyncio.create_task(poll_forever(c)) if polling_enabled(c) else None
+        yield
+        if poller:
+            poller.cancel()
+            with suppress(asyncio.CancelledError):
+                await poller
+        await c.tasks.drain()
+
+    app = FastAPI(title="Recoup API", version="0.1.0", lifespan=lifespan)
+    app.state.container = c
 
     app.add_middleware(
         CORSMiddleware,
@@ -24,7 +40,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for r in (health, auth, webhooks, disputes, actions, recon, demo, admin):
+    for r in (health, auth, webhooks, telegram, disputes, actions, recon, demo, admin):
         app.include_router(r.router)
 
     def custom_openapi() -> dict[str, Any]:

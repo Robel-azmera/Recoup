@@ -1930,6 +1930,120 @@
         "title": "OrderStatus",
         "type": "string"
       },
+      "OutboxItem": {
+        "properties": {
+          "buttons": {
+            "default": [],
+            "items": {
+              "items": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "title": "Buttons",
+            "type": "array"
+          },
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "edited_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edited At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id"
+          },
+          "sent_at": {
+            "title": "Sent At",
+            "type": "string"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To"
+          }
+        },
+        "required": [
+          "id",
+          "channel",
+          "sent_at"
+        ],
+        "title": "OutboxItem",
+        "type": "object"
+      },
       "Payout": {
         "properties": {
           "amount": {
@@ -2086,6 +2200,24 @@
           "detail"
         ],
         "title": "PolicyCheck",
+        "type": "object"
+      },
+      "PressRequest": {
+        "properties": {
+          "callback_data": {
+            "title": "Callback Data",
+            "type": "string"
+          },
+          "message_id": {
+            "title": "Message Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "message_id",
+          "callback_data"
+        ],
+        "title": "PressRequest",
         "type": "object"
       },
       "ProposeRequest": {
@@ -2928,6 +3060,24 @@
         "title": "StripeEvidence",
         "type": "object"
       },
+      "TelegramAck": {
+        "properties": {
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "result"
+        ],
+        "title": "TelegramAck",
+        "type": "object"
+      },
       "Thresholds": {
         "properties": {
           "auto_refund_max_amount": {
@@ -3573,6 +3723,66 @@
         ]
       }
     },
+    "/demo/telegram/press": {
+      "post": {
+        "description": "Mock mode only: simulate tapping an inline button in the configured chat.",
+        "operationId": "press_mock_button_demo_telegram_press_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PressRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramAck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Press Mock Button",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
     "/disputes": {
       "get": {
         "description": "All disputes, soonest deadline first.",
@@ -3914,6 +4124,60 @@
         ]
       }
     },
+    "/notifications/outbox": {
+      "get": {
+        "description": "What the mock Telegram / Calendar / email clients 'sent' (newest first).",
+        "operationId": "outbox_notifications_outbox_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OutboxItem"
+                  },
+                  "title": "Response Outbox Notifications Outbox Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Outbox",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
     "/recon/exceptions/{exception_id}": {
       "post": {
         "description": "Analyst triage. These change Recoup's own records only (no money moves), so they don't\ngo through the policy gate; each one is audited.",
@@ -4150,6 +4414,68 @@
         "summary": "Summary",
         "tags": [
           "reconciliation"
+        ]
+      }
+    },
+    "/telegram/webhook": {
+      "post": {
+        "description": "Inline-button callbacks. Telegram echoes the secret set with setWebhook.",
+        "operationId": "telegram_webhook_telegram_webhook_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Telegram-Bot-Api-Secret-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Telegram-Bot-Api-Secret-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Update",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TelegramAck"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Telegram Webhook",
+        "tags": [
+          "notifications"
         ]
       }
     },

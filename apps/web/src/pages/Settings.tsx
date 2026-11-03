@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { ActivityFeed } from '../components/ActivityFeed';
 import { IntegrationStatus } from '../components/IntegrationStatus';
+import { Outbox } from '../components/Outbox';
 import { ApiError, createDemoCharge, syncNow, type DemoScenario } from '../lib/api';
 import { formatMoney } from '../lib/format';
 
@@ -124,9 +125,12 @@ export function Settings() {
         </p>
       </div>
       <IntegrationStatus />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <DemoConsole />
-        <ActivityFeed title="Live events" />
+      <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="space-y-6">
+          <DemoConsole />
+          <ActivityFeed title="Live events" />
+        </div>
+        <Outbox />
       </div>
     </div>
   );

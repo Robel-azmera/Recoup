@@ -163,6 +163,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/demo/telegram/press": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Press Mock Button
+         * @description Mock mode only: simulate tapping an inline button in the configured chat.
+         */
+        post: operations["press_mock_button_demo_telegram_press_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/disputes": {
         parameters: {
             query?: never;
@@ -284,6 +304,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/notifications/outbox": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Outbox
+         * @description What the mock Telegram / Calendar / email clients 'sent' (newest first).
+         */
+        get: operations["outbox_notifications_outbox_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/recon/exceptions/{exception_id}": {
         parameters: {
             query?: never;
@@ -356,6 +396,26 @@ export interface paths {
         get: operations["summary_recon_summary_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/telegram/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Telegram Webhook
+         * @description Inline-button callbacks. Telegram echoes the secret set with setWebhook.
+         */
+        post: operations["telegram_webhook_telegram_webhook_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1132,6 +1192,36 @@ export interface components {
          * @enum {string}
          */
         OrderStatus: "paid" | "fulfilled" | "refunded" | "cancelled";
+        /** OutboxItem */
+        OutboxItem: {
+            /**
+             * Buttons
+             * @default []
+             */
+            buttons: {
+                [key: string]: string;
+            }[][];
+            /** Channel */
+            channel: string;
+            /** Edited At */
+            edited_at?: string | null;
+            /** Id */
+            id: string;
+            /** Message Id */
+            message_id?: number | null;
+            /** Sent At */
+            sent_at: string;
+            /** Start */
+            start?: string | null;
+            /** Subject */
+            subject?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Text */
+            text?: string | null;
+            /** To */
+            to?: string | null;
+        };
         /** Payout */
         Payout: {
             /**
@@ -1189,6 +1279,13 @@ export interface components {
             name: string;
             /** Passed */
             passed: boolean;
+        };
+        /** PressRequest */
+        PressRequest: {
+            /** Callback Data */
+            callback_data: string;
+            /** Message Id */
+            message_id: number;
         };
         /** ProposeRequest */
         ProposeRequest: {
@@ -1452,6 +1549,13 @@ export interface components {
             shipping_tracking_number: string | null;
             /** Uncategorized Text */
             uncategorized_text: string | null;
+        };
+        /** TelegramAck */
+        TelegramAck: {
+            /** Ok */
+            ok: boolean;
+            /** Result */
+            result: string;
         };
         /** Thresholds */
         Thresholds: {
@@ -1816,6 +1920,41 @@ export interface operations {
             };
         };
     };
+    press_mock_button_demo_telegram_press_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PressRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramAck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_disputes_disputes_get: {
         parameters: {
             query?: never;
@@ -2011,6 +2150,37 @@ export interface operations {
             };
         };
     };
+    outbox_notifications_outbox_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OutboxItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     update_exception_recon_exceptions__exception_id__post: {
         parameters: {
             query?: never;
@@ -2130,6 +2300,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReconSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    telegram_webhook_telegram_webhook_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Telegram-Bot-Api-Secret-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramAck"];
                 };
             };
             /** @description Validation Error */
