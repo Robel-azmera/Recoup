@@ -59,7 +59,7 @@ Each integration runs as a mock until you set its key in `apps/api/.env`. `GET /
 ### Stripe (test mode)
 
 1. Put your test secret key in `STRIPE_SECRET_KEY=sk_test_...`.
-2. Run `py scripts/stripe_listen.py [path	o\stripe.exe]`. It uses that key, so no `stripe login` is needed, and forwards the right events to `localhost:8080/webhooks/stripe`.
+2. Run `py scripts/stripe_listen.py [path-to-stripe.exe]`. It uses that key, so no `stripe login` is needed, and forwards the right events to `localhost:8080/webhooks/stripe`.
 3. Copy the `whsec_...` it prints into `STRIPE_WEBHOOK_SECRET`, then restart the API.
 4. Re-run the seed. The 12 recent orders become real PaymentIntents, using Stripe's dispute and early-fraud-warning test cards.
 
