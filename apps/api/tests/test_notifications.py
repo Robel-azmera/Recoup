@@ -52,7 +52,8 @@ async def press(
 
 
 async def test_new_disputes_get_telegram_alert_and_calendar_event(seeded: Container) -> None:
-    tg, cal = await outbox(seeded, "telegram"), await outbox(seeded, "calendar")
+    tg = [m for m in await outbox(seeded, "telegram") if "New dispute" in m["text"]]
+    cal = await outbox(seeded, "calendar")
     disputes = await seeded.disputes.list()
     assert len(tg) == len(cal) == len(disputes) == 6
     for d in disputes:

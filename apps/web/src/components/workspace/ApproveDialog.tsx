@@ -35,13 +35,14 @@ export function ApproveDialog({
               ? 'Evidence submitted to Stripe.'
               : a.type === 'accept_dispute'
                 ? 'Dispute closed in Stripe.'
-                : undefined,
+                : a.type === 'refund_charge'
+                  ? 'Refunded in Stripe; the customer is emailed.'
+                  : undefined,
         });
       } else {
         toast.error(`Blocked by policy`, { description: a.error ?? a.status });
       }
-      void qc.invalidateQueries({ queryKey: ['dispute'] });
-      void qc.invalidateQueries({ queryKey: ['disputes'] });
+      void qc.invalidateQueries(); // dispute, list, KPIs, fraud warnings, outbox all move
       onClose();
     },
     onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Approval failed'),

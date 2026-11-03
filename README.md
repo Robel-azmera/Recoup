@@ -11,7 +11,7 @@ Money moves only after a person approves it.
 - Spec: [`docs/SOLUTION_DESIGN.md`](docs/SOLUTION_DESIGN.md)
 - Decisions log: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
-> Status: **Phase 5 (notifications)**. This README grows with each phase.
+> Status: **Phase 6 (W2, W4, KPIs, command bar)**. This README grows with each phase.
 
 ## Layout
 
@@ -96,6 +96,9 @@ Without these keys, everything goes to the **Notification outbox** in Settings, 
 | Approve an action | `GET /actions/{id}` returns a 30-minute approval token bound to you and the payload hash; `POST /actions/{id}/approve {"approval_token": ...}` |
 | Reconcile payouts (W3) | Reconciliation → **Run reconciliation now** (or `POST /recon/run`). It finds the 6 planted exceptions, each with an explanation and a suggested action. Resolve, snooze or mark expected; expand a payout to see transaction → order matching. |
 | Approve from Telegram (W1) | Each new dispute sends an alert with **Approve & submit / Edit / Accept loss**. A tap shows the policy checks; **Confirm** executes through the gate. With mocks, use Settings → Notification outbox. A Calendar event is created at `due_by − 48h`. |
+| Early fraud warning (W2) | Demo Console → **Early fraud warning**. The agent recommends a refund (Overview → Early fraud warnings, or the Telegram alert). Approve it: Stripe refund, customer email, customer flagged risky. Auto-refund under a limit is a toggle in Settings → Policies. |
+| Daily job: recon + deadline sweep + brief (W3/W4) | Overview → **Run daily job + brief**, or `curl -X POST localhost:8080/jobs/daily -H "X-Job-Secret: dev-job-secret"` (add `?force=true` to re-run today). The brief goes to Telegram and email. |
+| Command bar (W5) | Press **⌘K / Ctrl+K**: "Which disputes over $150 are due in 3 days?", "Why is yesterday's payout short?", "Draft evidence for dp_… but stress the delivery photo". Write requests return a confirmation card. |
 | Stripe sync | Demo Console → *Sync from Stripe now*, or `POST /admin/sync` |
 
 ## Agent design (short)

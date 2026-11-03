@@ -3,6 +3,7 @@ import { LayoutDashboard, LogOut, Menu, Scale, Settings, ShieldAlert, X } from '
 import { useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
+import { CommandBar } from './CommandBar';
 import { ThemeToggle } from './ThemeToggle';
 
 const NAV = [
@@ -98,6 +99,7 @@ export function Layout({ children, onLogout }: { children: ReactNode; onLogout: 
             <Logo />
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <CommandBar />
             <ThemeToggle />
             <button
               type="button"

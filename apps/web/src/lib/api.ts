@@ -124,3 +124,16 @@ export type OutboxItem = Schemas['OutboxItem'];
 export const getOutbox = () => api<OutboxItem[]>('/notifications/outbox');
 export const pressTelegramButton = (message_id: number, callback_data: string) =>
   post<{ ok: boolean; result: string }>('/demo/telegram/press', { message_id, callback_data });
+
+export type Kpis = Schemas['Kpis'];
+export type EarlyFraudWarning = Schemas['EarlyFraudWarning'];
+export type DailySummary = Schemas['DailySummary'];
+export type CommandResult = Schemas['CommandResult'];
+export type ConfirmCard = Schemas['ConfirmCard'];
+
+export const getKpis = () => api<Kpis>('/kpis');
+export const listFraudWarnings = () => api<EarlyFraudWarning[]>('/fraud-warnings');
+export const dismissFraudWarning = (id: string) =>
+  post<{ warning: EarlyFraudWarning }>(`/fraud-warnings/${encodeURIComponent(id)}/dismiss`);
+export const runDailyJob = () => post<DailySummary>('/admin/jobs/daily');
+export const runCommand = (query: string) => post<CommandResult>('/command', { query });

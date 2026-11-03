@@ -52,6 +52,11 @@ class MockLLM:
         return ReconExplanations(items=_recon_items(history))
 
     async def generate(self, system: str, history: list[Turn], tools: list[dict[str, Any]]) -> Turn:
+        ctx0 = _context(history)
+        if ctx0.get("mode") == "command":
+            from .mock_command import command_turn
+
+            return command_turn(history, ctx0)
         if any(t.role == "tool" for t in history):
             return Turn(role="model", text="I have the evidence I need.")
         ctx = _context(history)

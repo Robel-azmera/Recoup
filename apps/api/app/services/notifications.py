@@ -173,6 +173,122 @@ class NotificationService:
             "Deadline reminder 48h before due_by",
         )
 
+    async def efw_alert(self, efw: Any, amount: int, currency: str) -> None:
+        ref = await self._new_ref(efw.id, "efw")
+        from html import escape
+
+        text = (
+            f"🚨 <b>Early fraud warning · {templates.money(amount, currency)}</b>\n"
+            f"The issuer reports <b>{escape(efw.fraud_type.replace('_', ' '))}</b> on <code>{escape(efw.charge_id)}</code>"
+            + (f" (order <code>{escape(efw.order_id)}</code>)" if efw.order_id else "")
+            + f".\n{escape(efw.recommendation or '')}"
+        )
+        await self._send(
+            ActionType.send_telegram,
+            efw.id,
+            {
+                "chat_id": self.chat_id,
+                "text": text,
+                "refs": [ref],
+                "kind": "efw_alert",
+                "buttons": [
+                    [
+                        {
+                            "text": f"💸 Refund {templates.money(amount, currency)}",
+                            "callback_data": f"rf:{ref}",
+                        },
+                        {"text": "Dismiss", "callback_data": f"dm:{ref}"},
+                    ]
+                ],
+            },
+            "Early fraud warning alert",
+        )
+
+    async def _handle_efw(
+        self, cq: dict[str, Any], verb: str, ref: str, ref_doc: dict[str, Any], user: str
+    ) -> str:
+        from ..policy.gate import PolicyError
+
+        efw_svc = self.c.efw
+        e = await efw_svc.get(ref_doc["dispute_id"])
+        if e is None:
+            return "unknown_efw"
+        mid = int((cq.get("message") or {}).get("message_id") or ref_doc.get("message_id") or 0)
+        if e.status in ("refunded", "dismissed"):
+            await self.telegram.edit_message(
+                self.chat_id, mid, f"Fraud warning <code>{e.id}</code> is already {e.status}."
+            )
+            await self.telegram.answer_callback(cq["id"], f"Already {e.status}.")
+            return "closed"
+        action = await self.c.gate.get(e.proposed_action_id or "")
+        if verb == "dm":
+            await efw_svc.dismiss(e.id, user)
+            await self.telegram.edit_message(
+                self.chat_id, mid, f"Fraud warning <code>{e.id}</code> dismissed by {user}."
+            )
+            await self.telegram.answer_callback(cq["id"], "Dismissed")
+            return "dismissed"
+        if action is None or action.status != ActionStatus.proposed:
+            await self.telegram.answer_callback(
+                cq["id"], "No refund is pending for this warning.", alert=True
+            )
+            return "no_action"
+        if verb == "rf":
+            checks = await self.c.gate.evaluate(action)
+            await self.c.store.set(
+                REFS, ref, {"pending_action_id": action.id, "pending_hash": action.hash}, merge=True
+            )
+            failed = [c for c in checks if not c.passed]
+            lines = [
+                f"<b>Refund {templates.money(action.amount or 0)}</b> · <code>{e.charge_id}</code>"
+            ]
+            lines += [f"🚫 {c.name}: {c.detail or 'failed'}" for c in failed] or [
+                f"✅ All {len(checks)} policy checks pass. Confirm?"
+            ]
+            buttons: Buttons = (
+                [[{"text": "Cancel", "callback_data": f"dm:{ref}"}]]
+                if failed
+                else [
+                    [
+                        {
+                            "text": f"Confirm refund · {templates.money(action.amount or 0)}",
+                            "callback_data": f"rfy:{ref}",
+                        },
+                        {"text": "Dismiss warning", "callback_data": f"dm:{ref}"},
+                    ]
+                ]
+            )
+            await self.telegram.edit_message(self.chat_id, mid, "\n".join(lines), buttons)
+            await self.telegram.answer_callback(cq["id"], "Check the policy results, then confirm.")
+            return "confirm_shown"
+        if verb == "rfy":
+            if action.id != ref_doc.get("pending_action_id") or action.hash != ref_doc.get(
+                "pending_hash"
+            ):
+                await self.telegram.answer_callback(
+                    cq["id"], "The refund changed. Tap Refund again.", alert=True
+                )
+                return "stale"
+            try:
+                result = await self.c.gate.approve(
+                    action.id, user, self.c.gate.mint_token(action, user)
+                )
+            except PolicyError as err:
+                await self.telegram.answer_callback(cq["id"], str(err), alert=True)
+                return "rejected"
+            icon = "✅" if result.status == ActionStatus.executed else "🚫"
+            await self.telegram.edit_message(
+                self.chat_id,
+                mid,
+                f"{icon} Refund {templates.money(result.amount or 0)} · <code>{e.charge_id}</code>\n{result.status.value} by {user}"
+                + (f"\n{result.error}" if result.error else ""),
+            )
+            await self.telegram.answer_callback(
+                cq["id"], "Refunded" if result.status == ActionStatus.executed else "Blocked"
+            )
+            return result.status.value
+        return "unknown_verb"
+
     async def send_email(
         self, to: str, subject: str, html: str, text: str, target: str, reason: str
     ) -> ProposedAction:
@@ -222,6 +338,14 @@ class NotificationService:
         if not ref_doc:
             await self.telegram.answer_callback(cq["id"], "This button has expired.", alert=True)
             return "unknown_ref"
+        if ref_doc.get("kind") == "efw":
+            await self.c.audit.log(
+                "telegram.button",
+                actor=Actor.user,
+                subject_id=ref_doc["dispute_id"],
+                input={"verb": verb, "user": user},
+            )
+            return await self._handle_efw(cq, verb, ref, ref_doc, user)
         d = await self.c.disputes.get(ref_doc["dispute_id"])
         if d is None:
             return "unknown_dispute"

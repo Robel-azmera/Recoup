@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { ActivityFeed } from '../components/ActivityFeed';
 import { IntegrationStatus } from '../components/IntegrationStatus';
 import { Outbox } from '../components/Outbox';
+import { PoliciesForm } from '../components/PoliciesForm';
 import { ApiError, createDemoCharge, syncNow, type DemoScenario } from '../lib/api';
 import { formatMoney } from '../lib/format';
 
@@ -121,10 +122,11 @@ export function Settings() {
       <div>
         <h1 className="text-xl font-semibold">Settings</h1>
         <p className="text-sm text-slate-500">
-          Integrations, demo tools. Policies and thresholds come in Phase 6.
+          Integrations, policies the gate enforces, and demo tools.
         </p>
       </div>
       <IntegrationStatus />
+      <PoliciesForm />
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <DemoConsole />

@@ -107,6 +107,7 @@ class ListDisputesInput(BaseModel):
     min_amount: int | None = Field(default=None, description="Minimum amount in cents")
     due_within_days: int | None = Field(default=None, description="Only disputes due within N days")
     limit: int = Field(default=20, ge=1, le=50)
+    open_only: bool = Field(default=True, description="Only disputes still awaiting a response")
 
 
 class ReconInput(BaseModel):
@@ -286,6 +287,10 @@ async def list_disputes(c: Container, i: ListDisputesInput) -> ToolResult:
     if i.status:
         filters.append(("status", "==", i.status))
     docs = await c.store.query("disputes", filters, order_by="due_by")
+    if i.open_only and not i.status:
+        docs = [
+            d for d in docs if d["status"] in ("needs_response", "drafting", "awaiting_approval")
+        ]
     if i.min_amount is not None:
         docs = [d for d in docs if d["amount"] >= i.min_amount]
     if i.due_within_days is not None:
@@ -355,6 +360,42 @@ async def get_recon_exceptions(c: Container, i: ReconInput) -> ToolResult:
     )
 
 
+class FraudWarningsInput(BaseModel):
+    status: str | None = Field(
+        default=None, description="open | refund_proposed | refunded | dismissed"
+    )
+
+
+async def list_fraud_warnings(c: Container, i: FraudWarningsInput) -> ToolResult:
+    docs = await c.store.query("fraud_warnings", order_by="created", descending=True)
+    if i.status:
+        docs = [d for d in docs if d.get("status") == i.status]
+    records = [
+        SourceRecord(
+            id=d["id"],
+            kind="fraud_warning",
+            label=f"Early fraud warning {d['id']}",
+            data={
+                k: d.get(k)
+                for k in (
+                    "charge_id",
+                    "order_id",
+                    "amount",
+                    "currency",
+                    "fraud_type",
+                    "status",
+                    "recommendation",
+                    "created",
+                )
+            },
+        )
+        for d in docs[:20]
+    ]
+    return ToolResult(
+        tool="list_fraud_warnings", summary=f"{len(records)} fraud warning(s)", records=records
+    )
+
+
 TOOLS: dict[str, Tool] = {
     t.name: t
     for t in [
@@ -396,6 +437,12 @@ TOOLS: dict[str, Tool] = {
             "List disputes, optionally filtered by status, amount or deadline.",
             ListDisputesInput,
             list_disputes,
+        ),
+        Tool(
+            "list_fraud_warnings",
+            "List Radar early fraud warnings and their refund status.",
+            FraudWarningsInput,
+            list_fraud_warnings,
         ),
         Tool(
             "get_recon_exceptions",

@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @layer base {
+  /* Chart tokens (validated: dataviz validate_palette, light #fff / dark #0f172a) */
+  :root {
+    --series-1: #2a78d6;
+    --chart-grid: #e2e8f0;
+    --chart-text: #475569;
+  }
+  .dark {
+    --series-1: #3987e5;
+    --chart-grid: #1e293b;
+    --chart-text: #94a3b8;
+  }
   html {
     @apply antialiased;
   }

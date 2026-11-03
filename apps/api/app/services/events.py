@@ -6,6 +6,7 @@ mock and real events take exactly the same path.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from ..integrations.store import Store
@@ -43,6 +44,7 @@ class EventProcessor:
         self._disputes = disputes
         self._sync = sync
         self._audit = audit
+        self.on_efw: list[Callable[[EarlyFraudWarning], Awaitable[None]]] = []
 
     async def process(self, event: StripeObj, *, source: str = "stripe") -> str:
         """Returns 'processed' | 'ignored' | 'duplicate'. Raises on handler failure."""
@@ -122,6 +124,9 @@ class EventProcessor:
                 }
             )
         await self._store.set("fraud_warnings", efw.id, to_doc(efw))
+        if not existing:
+            for hook in self.on_efw:
+                await hook(efw)
         await self._audit.log(
             "fraud_warning.received",
             subject_id=efw.id,

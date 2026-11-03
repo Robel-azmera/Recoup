@@ -11,7 +11,20 @@ from .config import Settings, get_settings
 from .deps import Container, build_container
 from .logging import configure_logging
 from .models import SCHEMA_MODELS
-from .routers import actions, admin, auth, demo, disputes, health, recon, telegram, webhooks
+from .routers import (
+    actions,
+    admin,
+    auth,
+    command,
+    demo,
+    disputes,
+    health,
+    jobs,
+    recon,
+    telegram,
+    webhooks,
+)
+from .routers import settings as settings_router
 from .services.telegram_poller import poll_forever, polling_enabled
 
 
@@ -40,7 +53,20 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    for r in (health, auth, webhooks, telegram, disputes, actions, recon, demo, admin):
+    for r in (
+        health,
+        auth,
+        webhooks,
+        telegram,
+        jobs,
+        disputes,
+        actions,
+        recon,
+        command,
+        settings_router,
+        demo,
+        admin,
+    ):
         app.include_router(r.router)
 
     def custom_openapi() -> dict[str, Any]:

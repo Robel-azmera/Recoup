@@ -72,6 +72,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/jobs/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Daily Now
+         * @description 'Run the daily job now' from the UI (demo). Forces a re-run for today.
+         */
+        post: operations["run_daily_now_admin_jobs_daily_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/sync": {
         parameters: {
             query?: never;
@@ -140,6 +160,26 @@ export interface paths {
         get: operations["me_auth_me_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/command": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Command
+         * @description Natural-language command bar. Reads run now; writes come back as confirmation cards.
+         */
+        post: operations["command_command_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -284,6 +324,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/fraud-warnings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fraud Warnings */
+        get: operations["fraud_warnings_fraud_warnings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fraud-warnings/{efw_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss */
+        post: operations["dismiss_fraud_warnings__efw_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -296,6 +370,43 @@ export interface paths {
          * @description Liveness + which integrations are real (True) vs mocked (False).
          */
         get: operations["healthz_healthz_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/daily": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Jobs Daily
+         * @description Cloud Scheduler 07:00 Africa/Addis_Ababa (or GitHub Actions cron). Idempotent per day.
+         */
+        post: operations["jobs_daily_jobs_daily_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/kpis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kpis */
+        get: operations["kpis_kpis_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -402,6 +513,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Settings */
+        get: operations["get_settings_settings_get"];
+        /**
+         * Put Settings
+         * @description Thresholds, auto-policies and brief channels. The policy gate reads these on every check.
+         */
+        put: operations["put_settings_settings_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/telegram/webhook": {
         parameters: {
             query?: never;
@@ -486,6 +618,20 @@ export interface components {
             demo: components["schemas"]["DemoSettings"];
             thresholds: components["schemas"]["Thresholds"];
         };
+        /** AppSettings */
+        "AppSettings-Input": {
+            auto_policies?: components["schemas"]["AutoPolicies-Input"];
+            channels?: components["schemas"]["Channels-Input"];
+            demo?: components["schemas"]["DemoSettings-Input"];
+            thresholds?: components["schemas"]["Thresholds-Input"];
+        };
+        /** AppSettings */
+        "AppSettings-Output": {
+            auto_policies: components["schemas"]["AutoPolicies-Output"];
+            channels: components["schemas"]["Channels-Output"];
+            demo: components["schemas"]["DemoSettings-Output"];
+            thresholds: components["schemas"]["Thresholds-Output"];
+        };
         /** ApproveRequest */
         ApproveRequest: {
             /** Approval Token */
@@ -539,6 +685,26 @@ export interface components {
              * Auto Submit Min Score
              * @default null
              */
+            auto_submit_min_score: number | null;
+        };
+        /** AutoPolicies */
+        "AutoPolicies-Input": {
+            /**
+             * Auto Refund Efw
+             * @default false
+             */
+            auto_refund_efw: boolean;
+            /** Auto Submit Min Score */
+            auto_submit_min_score?: number | null;
+        };
+        /** AutoPolicies */
+        "AutoPolicies-Output": {
+            /**
+             * Auto Refund Efw
+             * @default false
+             */
+            auto_refund_efw: boolean;
+            /** Auto Submit Min Score */
             auto_submit_min_score: number | null;
         };
         /** BalanceTxn */
@@ -601,6 +767,15 @@ export interface components {
             /** Last4 */
             last4: string;
         };
+        /** CategoryStat */
+        CategoryStat: {
+            /** Amount */
+            amount: number;
+            /** Category */
+            category: string;
+            /** Count */
+            count: number;
+        };
         /** Channels */
         Channels: {
             /**
@@ -622,6 +797,40 @@ export interface components {
              * Telegram Chat Id
              * @default null
              */
+            telegram_chat_id: string | null;
+        };
+        /** Channels */
+        "Channels-Input": {
+            /**
+             * Brief Email
+             * @default true
+             */
+            brief_email: boolean;
+            /**
+             * Brief Telegram
+             * @default true
+             */
+            brief_telegram: boolean;
+            /** Owner Email */
+            owner_email?: string | null;
+            /** Telegram Chat Id */
+            telegram_chat_id?: string | null;
+        };
+        /** Channels */
+        "Channels-Output": {
+            /**
+             * Brief Email
+             * @default true
+             */
+            brief_email: boolean;
+            /**
+             * Brief Telegram
+             * @default true
+             */
+            brief_telegram: boolean;
+            /** Owner Email */
+            owner_email: string | null;
+            /** Telegram Chat Id */
             telegram_chat_id: string | null;
         };
         /**
@@ -718,6 +927,46 @@ export interface components {
             /** Label */
             label: string;
         };
+        /** CommandRequest */
+        CommandRequest: {
+            /** Query */
+            query: string;
+        };
+        /** CommandResult */
+        CommandResult: {
+            /** Answer */
+            answer: string;
+            /** Cards */
+            cards: components["schemas"]["ConfirmCard"][];
+            /** Model */
+            model: string;
+            /** Query */
+            query: string;
+            /** Records */
+            records: components["schemas"]["SourceRecord"][];
+            /** Tool Calls */
+            tool_calls: string[];
+        };
+        /** ConfirmCard */
+        ConfirmCard: {
+            /** Amount */
+            amount: number | null;
+            /** Description */
+            description: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "draft" | "submit" | "accept" | "refund" | "recon";
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Target Id */
+            target_id: string | null;
+            /** Title */
+            title: string;
+        };
         /** Customer */
         Customer: {
             /** Email */
@@ -731,6 +980,88 @@ export interface components {
              * @default false
              */
             risky: boolean;
+        };
+        /** DailySummary */
+        DailySummary: {
+            /**
+             * Brief Channels
+             * @default []
+             */
+            brief_channels: string[];
+            /** Day */
+            day: string;
+            /**
+             * Deadline Alerts
+             * @default 0
+             */
+            deadline_alerts: number;
+            /**
+             * Drafts Started
+             * @default 0
+             */
+            drafts_started: number;
+            /**
+             * Efw Handled
+             * @default 0
+             */
+            efw_handled: number;
+            /** Error */
+            error: string | null;
+            /**
+             * Escalations
+             * @default 0
+             */
+            escalations: number;
+            /** Finished At */
+            finished_at: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Recon New Exceptions
+             * @default 0
+             */
+            recon_new_exceptions: number;
+            /** Recon Run Id */
+            recon_run_id: string | null;
+            /**
+             * Reused
+             * @default false
+             */
+            reused: boolean;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Status */
+            status: string;
+            /**
+             * Synced
+             * @default {}
+             */
+            synced: {
+                [key: string]: number;
+            };
+        };
+        /** DeadlineItem */
+        DeadlineItem: {
+            /** Amount */
+            amount: number;
+            /** Category */
+            category: string;
+            /** Currency */
+            currency: string;
+            /** Dispute Id */
+            dispute_id: string;
+            /**
+             * Due By
+             * Format: date-time
+             */
+            due_by: string;
+            /** Status */
+            status: string;
+            /** Win Score */
+            win_score: number | null;
         };
         /** DemoChargeRequest */
         DemoChargeRequest: {
@@ -776,6 +1107,32 @@ export interface components {
              * @default won
              */
             force_test_outcome: ("won" | "lost") | null;
+        };
+        /**
+         * DemoSettings
+         * @description Test mode only: append Stripe's magic evidence value so submitted disputes close.
+         */
+        "DemoSettings-Input": {
+            /**
+             * Force Test Outcome
+             * @default won
+             */
+            force_test_outcome: ("won" | "lost") | null;
+        };
+        /**
+         * DemoSettings
+         * @description Test mode only: append Stripe's magic evidence value so submitted disputes close.
+         */
+        "DemoSettings-Output": {
+            /**
+             * Force Test Outcome
+             * @default won
+             */
+            force_test_outcome: ("won" | "lost") | null;
+        };
+        /** DismissResponse */
+        DismissResponse: {
+            warning: components["schemas"]["EarlyFraudWarning"];
         };
         /** Dispute */
         Dispute: {
@@ -955,20 +1312,11 @@ export interface components {
             fraud_type: string;
             /** Id */
             id: string;
-            /**
-             * Order Id
-             * @default null
-             */
+            /** Order Id */
             order_id: string | null;
-            /**
-             * Proposed Action Id
-             * @default null
-             */
+            /** Proposed Action Id */
             proposed_action_id: string | null;
-            /**
-             * Recommendation
-             * @default null
-             */
+            /** Recommendation */
             recommendation: string | null;
             /**
              * Status
@@ -1089,6 +1437,50 @@ export interface components {
             status: string;
             /** Store */
             store: string;
+        };
+        /** Kpis */
+        Kpis: {
+            /** Accepted */
+            accepted: number;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** At Risk */
+            at_risk: number;
+            /** By Category */
+            by_category: components["schemas"]["CategoryStat"][];
+            /** Charges 30D */
+            charges_30d: number;
+            /** Deadlines */
+            deadlines: components["schemas"]["DeadlineItem"][];
+            /** Dispute Rate */
+            dispute_rate: number;
+            /** Dispute Rate Threshold */
+            dispute_rate_threshold: number;
+            /** Disputes 30D */
+            disputes_30d: number;
+            /** Due 72H */
+            due_72h: number;
+            /** Efw Open */
+            efw_open: number;
+            /** Lost */
+            lost: number;
+            /** New Disputes 24H */
+            new_disputes_24h: number;
+            /** Open Disputes */
+            open_disputes: number;
+            /** Recon Discrepancy */
+            recon_discrepancy: number;
+            /** Recon Open */
+            recon_open: number;
+            /** Recovered */
+            recovered: number;
+            /** Win Rate */
+            win_rate: number | null;
+            /** Won */
+            won: number;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -1509,6 +1901,22 @@ export interface components {
             three_d_secure: string | null;
         };
         /**
+         * SourceRecord
+         * @description A citable fact source returned by a tool. `id` is what citations point at.
+         */
+        SourceRecord: {
+            /** Data */
+            data: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+        };
+        /**
          * StripeEvidence
          * @description Text evidence fields accepted by Stripe's disputes.update (file fields excluded).
          */
@@ -1559,6 +1967,62 @@ export interface components {
         };
         /** Thresholds */
         Thresholds: {
+            /**
+             * Auto Refund Max Amount
+             * @default 5000
+             */
+            auto_refund_max_amount: number;
+            /**
+             * Deadline Alert Hours
+             * @default 72
+             */
+            deadline_alert_hours: number;
+            /**
+             * Dispute Rate Threshold
+             * @default 0.009
+             */
+            dispute_rate_threshold: number;
+            /**
+             * Fight Min Amount
+             * @default 1500
+             */
+            fight_min_amount: number;
+            /**
+             * Max Refund Amount
+             * @default 100000
+             */
+            max_refund_amount: number;
+        };
+        /** Thresholds */
+        "Thresholds-Input": {
+            /**
+             * Auto Refund Max Amount
+             * @default 5000
+             */
+            auto_refund_max_amount: number;
+            /**
+             * Deadline Alert Hours
+             * @default 72
+             */
+            deadline_alert_hours: number;
+            /**
+             * Dispute Rate Threshold
+             * @default 0.009
+             */
+            dispute_rate_threshold: number;
+            /**
+             * Fight Min Amount
+             * @default 1500
+             */
+            fight_min_amount: number;
+            /**
+             * Max Refund Amount
+             * @default 100000
+             */
+            max_refund_amount: number;
+        };
+        /** Thresholds */
+        "Thresholds-Output": {
             /**
              * Auto Refund Max Amount
              * @default 5000
@@ -1754,6 +2218,37 @@ export interface operations {
             };
         };
     };
+    run_daily_now_admin_jobs_daily_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailySummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     sync_now_admin_sync_post: {
         parameters: {
             query?: never;
@@ -1872,6 +2367,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    command_command_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommandRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommandResult"];
                 };
             };
             /** @description Validation Error */
@@ -2130,6 +2660,70 @@ export interface operations {
             };
         };
     };
+    fraud_warnings_fraud_warnings_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EarlyFraudWarning"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_fraud_warnings__efw_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                efw_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DismissResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     healthz_healthz_get: {
         parameters: {
             query?: never;
@@ -2146,6 +2740,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    jobs_daily_jobs_daily_post: {
+        parameters: {
+            query?: {
+                force?: boolean;
+            };
+            header?: {
+                authorization?: string | null;
+                "x-job-secret"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DailySummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    kpis_kpis_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Kpis"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2300,6 +2959,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReconSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_settings_settings_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSettings-Output"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_settings_settings_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppSettings-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppSettings-Output"];
                 };
             };
             /** @description Validation Error */

@@ -28,6 +28,7 @@ from .models import Dispute
 from .policy.gate import PolicyGate
 from .services.audit import AuditLog
 from .services.disputes import DisputeService
+from .services.efw import EfwService
 from .services.events import EventProcessor
 from .services.merchant import MerchantData, StoreMerchantData
 from .services.notifications import NotificationService
@@ -50,6 +51,7 @@ class Container:
     llm: LLM
     agent: DisputeAgent = None  # type: ignore[assignment]  # set right after construction
     notifier: NotificationService = None  # type: ignore[assignment]
+    efw: EfwService = None  # type: ignore[assignment]
 
 
 def build_llm(settings: Settings) -> LLM:
@@ -119,6 +121,15 @@ def build_container(
         RealEmail(s.resend_api_key, s.email_from) if s.resend_api_key else MockEmail(store)
     )
     c.notifier = NotificationService(c, telegram, calendar, email)
+    c.efw = EfwService(c)
+
+    async def efw_new(e: object) -> None:  # W2: recommend + propose in the background
+        from .models import EarlyFraudWarning
+
+        assert isinstance(e, EarlyFraudWarning)
+        c.tasks.spawn(c.efw.handle(e), name=f"efw:{e.id}")
+
+    events.on_efw.append(efw_new)
 
     if auto_draft:  # W1: every new dispute gets a draft, in the background (webhooks stay fast)
 

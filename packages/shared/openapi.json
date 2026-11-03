@@ -133,6 +133,48 @@
         "title": "AppSettings",
         "type": "object"
       },
+      "AppSettings-Input": {
+        "properties": {
+          "auto_policies": {
+            "$ref": "#/components/schemas/AutoPolicies-Input"
+          },
+          "channels": {
+            "$ref": "#/components/schemas/Channels-Input"
+          },
+          "demo": {
+            "$ref": "#/components/schemas/DemoSettings-Input"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds-Input"
+          }
+        },
+        "title": "AppSettings",
+        "type": "object"
+      },
+      "AppSettings-Output": {
+        "properties": {
+          "auto_policies": {
+            "$ref": "#/components/schemas/AutoPolicies-Output"
+          },
+          "channels": {
+            "$ref": "#/components/schemas/Channels-Output"
+          },
+          "demo": {
+            "$ref": "#/components/schemas/DemoSettings-Output"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds-Output"
+          }
+        },
+        "required": [
+          "thresholds",
+          "auto_policies",
+          "channels",
+          "demo"
+        ],
+        "title": "AppSettings",
+        "type": "object"
+      },
       "ApproveRequest": {
         "properties": {
           "approval_token": {
@@ -256,6 +298,54 @@
               }
             ],
             "default": null,
+            "title": "Auto Submit Min Score"
+          }
+        },
+        "required": [
+          "auto_refund_efw",
+          "auto_submit_min_score"
+        ],
+        "title": "AutoPolicies",
+        "type": "object"
+      },
+      "AutoPolicies-Input": {
+        "properties": {
+          "auto_refund_efw": {
+            "default": false,
+            "title": "Auto Refund Efw",
+            "type": "boolean"
+          },
+          "auto_submit_min_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auto Submit Min Score"
+          }
+        },
+        "title": "AutoPolicies",
+        "type": "object"
+      },
+      "AutoPolicies-Output": {
+        "properties": {
+          "auto_refund_efw": {
+            "default": false,
+            "title": "Auto Refund Efw",
+            "type": "boolean"
+          },
+          "auto_submit_min_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Auto Submit Min Score"
           }
         },
@@ -410,6 +500,29 @@
         "title": "CardSummary",
         "type": "object"
       },
+      "CategoryStat": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "integer"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "category",
+          "count",
+          "amount"
+        ],
+        "title": "CategoryStat",
+        "type": "object"
+      },
       "Channels": {
         "properties": {
           "brief_email": {
@@ -444,6 +557,88 @@
               }
             ],
             "default": null,
+            "title": "Telegram Chat Id"
+          }
+        },
+        "required": [
+          "telegram_chat_id",
+          "owner_email",
+          "brief_telegram",
+          "brief_email"
+        ],
+        "title": "Channels",
+        "type": "object"
+      },
+      "Channels-Input": {
+        "properties": {
+          "brief_email": {
+            "default": true,
+            "title": "Brief Email",
+            "type": "boolean"
+          },
+          "brief_telegram": {
+            "default": true,
+            "title": "Brief Telegram",
+            "type": "boolean"
+          },
+          "owner_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Email"
+          },
+          "telegram_chat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telegram Chat Id"
+          }
+        },
+        "title": "Channels",
+        "type": "object"
+      },
+      "Channels-Output": {
+        "properties": {
+          "brief_email": {
+            "default": true,
+            "title": "Brief Email",
+            "type": "boolean"
+          },
+          "brief_telegram": {
+            "default": true,
+            "title": "Brief Telegram",
+            "type": "boolean"
+          },
+          "owner_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Email"
+          },
+          "telegram_chat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Telegram Chat Id"
           }
         },
@@ -676,6 +871,128 @@
         "title": "CitedSource",
         "type": "object"
       },
+      "CommandRequest": {
+        "properties": {
+          "query": {
+            "maxLength": 500,
+            "minLength": 2,
+            "title": "Query",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "CommandRequest",
+        "type": "object"
+      },
+      "CommandResult": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/ConfirmCard"
+            },
+            "title": "Cards",
+            "type": "array"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRecord"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "tool_calls": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tool Calls",
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "answer",
+          "records",
+          "cards",
+          "tool_calls",
+          "model"
+        ],
+        "title": "CommandResult",
+        "type": "object"
+      },
+      "ConfirmCard": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "draft",
+              "submit",
+              "accept",
+              "refund",
+              "recon"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "description",
+          "target_id",
+          "params",
+          "amount"
+        ],
+        "title": "ConfirmCard",
+        "type": "object"
+      },
       "Customer": {
         "properties": {
           "email": {
@@ -703,6 +1020,177 @@
           "risky"
         ],
         "title": "Customer",
+        "type": "object"
+      },
+      "DailySummary": {
+        "properties": {
+          "brief_channels": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Brief Channels",
+            "type": "array"
+          },
+          "day": {
+            "title": "Day",
+            "type": "string"
+          },
+          "deadline_alerts": {
+            "default": 0,
+            "title": "Deadline Alerts",
+            "type": "integer"
+          },
+          "drafts_started": {
+            "default": 0,
+            "title": "Drafts Started",
+            "type": "integer"
+          },
+          "efw_handled": {
+            "default": 0,
+            "title": "Efw Handled",
+            "type": "integer"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "escalations": {
+            "default": 0,
+            "title": "Escalations",
+            "type": "integer"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "recon_new_exceptions": {
+            "default": 0,
+            "title": "Recon New Exceptions",
+            "type": "integer"
+          },
+          "recon_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recon Run Id"
+          },
+          "reused": {
+            "default": false,
+            "title": "Reused",
+            "type": "boolean"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "synced": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Synced",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "day",
+          "status",
+          "started_at",
+          "finished_at",
+          "reused",
+          "synced",
+          "recon_run_id",
+          "recon_new_exceptions",
+          "deadline_alerts",
+          "escalations",
+          "drafts_started",
+          "efw_handled",
+          "brief_channels",
+          "error"
+        ],
+        "title": "DailySummary",
+        "type": "object"
+      },
+      "DeadlineItem": {
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "integer"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "currency": {
+            "title": "Currency",
+            "type": "string"
+          },
+          "dispute_id": {
+            "title": "Dispute Id",
+            "type": "string"
+          },
+          "due_by": {
+            "format": "date-time",
+            "title": "Due By",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "win_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Win Score"
+          }
+        },
+        "required": [
+          "dispute_id",
+          "amount",
+          "currency",
+          "category",
+          "due_by",
+          "status",
+          "win_score"
+        ],
+        "title": "DeadlineItem",
         "type": "object"
       },
       "DemoChargeRequest": {
@@ -815,6 +1303,67 @@
           "force_test_outcome"
         ],
         "title": "DemoSettings",
+        "type": "object"
+      },
+      "DemoSettings-Input": {
+        "description": "Test mode only: append Stripe's magic evidence value so submitted disputes close.",
+        "properties": {
+          "force_test_outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "won",
+                  "lost"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "won",
+            "title": "Force Test Outcome"
+          }
+        },
+        "title": "DemoSettings",
+        "type": "object"
+      },
+      "DemoSettings-Output": {
+        "description": "Test mode only: append Stripe's magic evidence value so submitted disputes close.",
+        "properties": {
+          "force_test_outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "won",
+                  "lost"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "won",
+            "title": "Force Test Outcome"
+          }
+        },
+        "required": [
+          "force_test_outcome"
+        ],
+        "title": "DemoSettings",
+        "type": "object"
+      },
+      "DismissResponse": {
+        "properties": {
+          "warning": {
+            "$ref": "#/components/schemas/EarlyFraudWarning"
+          }
+        },
+        "required": [
+          "warning"
+        ],
+        "title": "DismissResponse",
         "type": "object"
       },
       "Dispute": {
@@ -1274,7 +1823,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Order Id"
           },
           "proposed_action_id": {
@@ -1286,7 +1834,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Proposed Action Id"
           },
           "recommendation": {
@@ -1298,7 +1845,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Recommendation"
           },
           "status": {
@@ -1657,6 +2203,123 @@
           "store"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "Kpis": {
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "integer"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "at_risk": {
+            "title": "At Risk",
+            "type": "integer"
+          },
+          "by_category": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryStat"
+            },
+            "title": "By Category",
+            "type": "array"
+          },
+          "charges_30d": {
+            "title": "Charges 30D",
+            "type": "integer"
+          },
+          "deadlines": {
+            "items": {
+              "$ref": "#/components/schemas/DeadlineItem"
+            },
+            "title": "Deadlines",
+            "type": "array"
+          },
+          "dispute_rate": {
+            "title": "Dispute Rate",
+            "type": "number"
+          },
+          "dispute_rate_threshold": {
+            "title": "Dispute Rate Threshold",
+            "type": "number"
+          },
+          "disputes_30d": {
+            "title": "Disputes 30D",
+            "type": "integer"
+          },
+          "due_72h": {
+            "title": "Due 72H",
+            "type": "integer"
+          },
+          "efw_open": {
+            "title": "Efw Open",
+            "type": "integer"
+          },
+          "lost": {
+            "title": "Lost",
+            "type": "integer"
+          },
+          "new_disputes_24h": {
+            "title": "New Disputes 24H",
+            "type": "integer"
+          },
+          "open_disputes": {
+            "title": "Open Disputes",
+            "type": "integer"
+          },
+          "recon_discrepancy": {
+            "title": "Recon Discrepancy",
+            "type": "integer"
+          },
+          "recon_open": {
+            "title": "Recon Open",
+            "type": "integer"
+          },
+          "recovered": {
+            "title": "Recovered",
+            "type": "integer"
+          },
+          "win_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Win Rate"
+          },
+          "won": {
+            "title": "Won",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "as_of",
+          "at_risk",
+          "open_disputes",
+          "due_72h",
+          "recovered",
+          "won",
+          "lost",
+          "accepted",
+          "win_rate",
+          "dispute_rate",
+          "dispute_rate_threshold",
+          "disputes_30d",
+          "charges_30d",
+          "recon_open",
+          "recon_discrepancy",
+          "efw_open",
+          "by_category",
+          "deadlines",
+          "new_disputes_24h"
+        ],
+        "title": "Kpis",
         "type": "object"
       },
       "LoginRequest": {
@@ -2835,6 +3498,36 @@
         "title": "RiskSignals",
         "type": "object"
       },
+      "SourceRecord": {
+        "description": "A citable fact source returned by a tool. `id` is what citations point at.",
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "data"
+        ],
+        "title": "SourceRecord",
+        "type": "object"
+      },
       "StripeEvidence": {
         "description": "Text evidence fields accepted by Stripe's disputes.update (file fields excluded).",
         "properties": {
@@ -3079,6 +3772,75 @@
         "type": "object"
       },
       "Thresholds": {
+        "properties": {
+          "auto_refund_max_amount": {
+            "default": 5000,
+            "title": "Auto Refund Max Amount",
+            "type": "integer"
+          },
+          "deadline_alert_hours": {
+            "default": 72,
+            "title": "Deadline Alert Hours",
+            "type": "integer"
+          },
+          "dispute_rate_threshold": {
+            "default": 0.009,
+            "title": "Dispute Rate Threshold",
+            "type": "number"
+          },
+          "fight_min_amount": {
+            "default": 1500,
+            "title": "Fight Min Amount",
+            "type": "integer"
+          },
+          "max_refund_amount": {
+            "default": 100000,
+            "title": "Max Refund Amount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "auto_refund_max_amount",
+          "fight_min_amount",
+          "max_refund_amount",
+          "dispute_rate_threshold",
+          "deadline_alert_hours"
+        ],
+        "title": "Thresholds",
+        "type": "object"
+      },
+      "Thresholds-Input": {
+        "properties": {
+          "auto_refund_max_amount": {
+            "default": 5000,
+            "title": "Auto Refund Max Amount",
+            "type": "integer"
+          },
+          "deadline_alert_hours": {
+            "default": 72,
+            "title": "Deadline Alert Hours",
+            "type": "integer"
+          },
+          "dispute_rate_threshold": {
+            "default": 0.009,
+            "title": "Dispute Rate Threshold",
+            "type": "number"
+          },
+          "fight_min_amount": {
+            "default": 1500,
+            "title": "Fight Min Amount",
+            "type": "integer"
+          },
+          "max_refund_amount": {
+            "default": 100000,
+            "title": "Max Refund Amount",
+            "type": "integer"
+          }
+        },
+        "title": "Thresholds",
+        "type": "object"
+      },
+      "Thresholds-Output": {
         "properties": {
           "auto_refund_max_amount": {
             "default": 5000,
@@ -3438,6 +4200,56 @@
         ]
       }
     },
+    "/admin/jobs/daily": {
+      "post": {
+        "description": "'Run the daily job now' from the UI (demo). Forces a re-run for today.",
+        "operationId": "run_daily_now_admin_jobs_daily_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Daily Now",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
     "/admin/sync": {
       "post": {
         "description": "Pull disputes, payouts and balance transactions from Stripe (idempotent).",
@@ -3661,6 +4473,66 @@
         "summary": "Me",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/command": {
+      "post": {
+        "description": "Natural-language command bar. Reads run now; writes come back as confirmation cards.",
+        "operationId": "command_command_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommandRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Command",
+        "tags": [
+          "command"
         ]
       }
     },
@@ -4102,6 +4974,117 @@
         ]
       }
     },
+    "/fraud-warnings": {
+      "get": {
+        "operationId": "fraud_warnings_fraud_warnings_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EarlyFraudWarning"
+                  },
+                  "title": "Response Fraud Warnings Fraud Warnings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fraud Warnings",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/fraud-warnings/{efw_id}/dismiss": {
+      "post": {
+        "operationId": "dismiss_fraud_warnings__efw_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "efw_id",
+            "required": true,
+            "schema": {
+              "title": "Efw Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DismissResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
     "/healthz": {
       "get": {
         "description": "Liveness + which integrations are real (True) vs mocked (False).",
@@ -4121,6 +5104,131 @@
         "summary": "Healthz",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/jobs/daily": {
+      "post": {
+        "description": "Cloud Scheduler 07:00 Africa/Addis_Ababa (or GitHub Actions cron). Idempotent per day.",
+        "operationId": "jobs_daily_jobs_daily_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "force",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Force",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-job-secret",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Job-Secret"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Jobs Daily",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/kpis": {
+      "get": {
+        "operationId": "kpis_kpis_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kpis"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kpis",
+        "tags": [
+          "jobs"
         ]
       }
     },
@@ -4414,6 +5522,113 @@
         "summary": "Summary",
         "tags": [
           "reconciliation"
+        ]
+      }
+    },
+    "/settings": {
+      "get": {
+        "operationId": "get_settings_settings_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppSettings-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "put": {
+        "description": "Thresholds, auto-policies and brief channels. The policy gate reads these on every check.",
+        "operationId": "put_settings_settings_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppSettings-Input"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppSettings-Output"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Settings",
+        "tags": [
+          "settings"
         ]
       }
     },
