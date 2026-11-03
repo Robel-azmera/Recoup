@@ -73,8 +73,11 @@ class StripeGateway(Protocol):
         customer_email: str,
         customer_name: str,
         idempotency_key: str,
+        created: datetime | None = None,
     ) -> StripeObj:
-        """Create + confirm a PaymentIntent; returns the resulting Charge."""
+        """Create + confirm a PaymentIntent; returns the resulting Charge.
+
+        `created` is honoured by the mock only (real Stripe always stamps "now")."""
         ...
 
     async def retrieve_charge(self, charge_id: str) -> StripeObj: ...
@@ -140,6 +143,7 @@ class RealStripe:
         customer_email: str,
         customer_name: str,
         idempotency_key: str,
+        created: datetime | None = None,
     ) -> StripeObj:
         import stripe
 
@@ -331,7 +335,8 @@ class MockStripe:
             return hit
         brand, last4 = _MOCK_CARDS.get(payment_method, ("visa", "4242"))
         efw = payment_method == "pm_card_createIssuerFraudRecord"
-        ts = int(created.timestamp()) if created else int(self.now())
+        now = int(self.now())
+        ts = int(created.timestamp()) if created else now
         charge: StripeObj = {
             "id": _id("ch"),
             "object": "charge",
@@ -382,7 +387,7 @@ class MockStripe:
                 "amount": amount,
                 "currency": currency,
                 "charge": charge["id"],
-                "created": ts,
+                "created": now,
                 "reason": reason,
                 "status": "warning_needs_response" if inquiry else "needs_response",
                 "is_charge_refundable": False,
@@ -392,7 +397,7 @@ class MockStripe:
                 "evidence_details": {
                     # Real Stripe sets this; the mock spreads deadlines over 2-11 days
                     # (deterministic per order) so the deadline list and sweep have variety.
-                    "due_by": ts
+                    "due_by": now
                     + _mock_due_days(metadata.get("order_id") or str(charge["id"])) * 86400,
                     "has_evidence": False,
                     "past_due": False,
@@ -407,7 +412,7 @@ class MockStripe:
                 "object": "radar.early_fraud_warning",
                 "actionable": True,
                 "charge": charge["id"],
-                "created": ts,
+                "created": now,
                 "fraud_type": "made_with_stolen_card",
                 "livemode": False,
             }

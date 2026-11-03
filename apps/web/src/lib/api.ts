@@ -81,3 +81,25 @@ export const getAudit = (subjectId?: string, limit = 40) =>
 export const createDemoCharge = (scenario: DemoScenario, amount?: number) =>
   post<DemoChargeResponse>('/demo/charges', { scenario, amount });
 export const syncNow = () => post<Record<string, number>>('/admin/sync');
+
+export type DisputeDetail = Schemas['DisputeDetail'];
+export type ActionView = Schemas['ActionView'];
+export type ProposedAction = Schemas['ProposedAction'];
+
+export const getDispute = (id: string) => api<DisputeDetail>(`/disputes/${encodeURIComponent(id)}`);
+export const regenerateDraft = (id: string, instruction?: string) =>
+  post<{ dispute_id: string; status: string }>(`/disputes/${encodeURIComponent(id)}/draft`, {
+    instruction: instruction || null,
+  });
+export const editEvidence = (id: string, fields: Record<string, string>) =>
+  api<Dispute>(`/disputes/${encodeURIComponent(id)}/evidence`, {
+    method: 'PUT',
+    body: JSON.stringify({ fields }),
+  });
+export const proposeForDispute = (id: string, type: 'submit' | 'accept') =>
+  post<ProposedAction>(`/disputes/${encodeURIComponent(id)}/propose`, { type });
+export const getAction = (id: string) => api<ActionView>(`/actions/${encodeURIComponent(id)}`);
+export const approveAction = (id: string, approval_token: string) =>
+  post<ProposedAction>(`/actions/${encodeURIComponent(id)}/approve`, { approval_token });
+export const rejectAction = (id: string, reason?: string) =>
+  post<ProposedAction>(`/actions/${encodeURIComponent(id)}/reject`, { reason: reason ?? null });

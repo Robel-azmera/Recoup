@@ -56,6 +56,7 @@ async def charge_order(c: Container, ro: RecentOrder, idempotency_key: str) -> t
         customer_email=order.customer.email,
         customer_name=order.customer.name,
         idempotency_key=idempotency_key,
+        created=order.created_at,
     )
     order.charge_id = stripe_charge["id"]
     await c.merchant.save_order(order)

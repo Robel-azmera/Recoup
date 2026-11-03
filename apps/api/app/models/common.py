@@ -18,7 +18,11 @@ def to_doc(model: BaseModel) -> dict[str, Any]:
 
 
 class RecoupModel(BaseModel):
-    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+    # Defaults are always present in responses, so mark them required in output schemas
+    # (generated TS types then have non-optional fields).
+    model_config = ConfigDict(
+        extra="ignore", populate_by_name=True, json_schema_serialization_defaults_required=True
+    )
 
 
 class CardSummary(RecoupModel):

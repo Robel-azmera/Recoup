@@ -10,6 +10,7 @@ from ..deps import Container, get_container
 from ..models import (
     ActionType,
     Actor,
+    Charge,
     Dispute,
     DisputeStatus,
     DraftSentence,
@@ -45,6 +46,7 @@ class DisputeDetail(BaseModel):
     order: Order | None
     messages: list[Message]
     actions: list[ProposedAction]
+    charge: Charge | None = None
 
 
 @router.get("/{dispute_id}", response_model=DisputeDetail)
@@ -54,8 +56,13 @@ async def get_dispute(
     d = await _get(c, dispute_id)
     order = await c.merchant.get_order(d.order_id) if d.order_id else None
     messages = await c.merchant.list_messages(d.order_id) if d.order_id else []
+    charge_doc = await c.store.get("charges", d.charge_id)
     return DisputeDetail(
-        dispute=d, order=order, messages=messages, actions=await c.gate.list_for(d.id)
+        dispute=d,
+        order=order,
+        messages=messages,
+        actions=await c.gate.list_for(d.id),
+        charge=Charge.model_validate(charge_doc) if charge_doc else None,
     )
 
 

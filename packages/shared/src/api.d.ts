@@ -335,18 +335,18 @@ export interface components {
             /** Line1 */
             line1: string;
             /** Line2 */
-            line2?: string | null;
+            line2: string | null;
             /** Postal Code */
             postal_code: string;
             /** State */
-            state?: string | null;
+            state: string | null;
         };
         /** AppSettings */
         AppSettings: {
-            auto_policies?: components["schemas"]["AutoPolicies"];
-            channels?: components["schemas"]["Channels"];
-            demo?: components["schemas"]["DemoSettings"];
-            thresholds?: components["schemas"]["Thresholds"];
+            auto_policies: components["schemas"]["AutoPolicies"];
+            channels: components["schemas"]["Channels"];
+            demo: components["schemas"]["DemoSettings"];
+            thresholds: components["schemas"]["Thresholds"];
         };
         /** ApproveRequest */
         ApproveRequest: {
@@ -359,7 +359,7 @@ export interface components {
             /** Id */
             id: string;
             /** Input */
-            input?: {
+            input: {
                 [key: string]: unknown;
             } | null;
             /**
@@ -368,11 +368,11 @@ export interface components {
              */
             level: string;
             /** Links */
-            links?: {
+            links: {
                 [key: string]: string;
             };
             /** Output */
-            output?: {
+            output: {
                 [key: string]: unknown;
             } | null;
             /** Step */
@@ -381,9 +381,9 @@ export interface components {
              * Subject Id
              * @description Primary object (dispute/run/action id) for per-object feeds
              */
-            subject_id?: string | null;
+            subject_id: string | null;
             /** Tool */
-            tool?: string | null;
+            tool: string | null;
             /**
              * Ts
              * Format: date-time
@@ -437,7 +437,7 @@ export interface components {
              */
             fee: number;
             /** Fee Details */
-            fee_details?: components["schemas"]["FeeDetail"][];
+            fee_details: components["schemas"]["FeeDetail"][];
             /** Id */
             id: string;
             /**
@@ -517,7 +517,6 @@ export interface components {
              * @default 0
              */
             amount_refunded: number;
-            /** @default null */
             card: components["schemas"]["CardSummary"] | null;
             /**
              * Created
@@ -529,15 +528,9 @@ export interface components {
              * @default usd
              */
             currency: string;
-            /**
-             * Customer Email
-             * @default null
-             */
+            /** Customer Email */
             customer_email: string | null;
-            /**
-             * Customer Name
-             * @default null
-             */
+            /** Customer Name */
             customer_name: string | null;
             /**
              * Disputed
@@ -546,31 +539,22 @@ export interface components {
             disputed: boolean;
             /** Id */
             id: string;
-            /**
-             * Order Id
-             * @default null
-             */
+            /** Order Id */
             order_id: string | null;
-            /**
-             * Payment Intent
-             * @default null
-             */
+            /** Payment Intent */
             payment_intent: string | null;
             /**
              * Refunded
              * @default false
              */
             refunded: boolean;
-            risk?: components["schemas"]["RiskSignals"];
+            risk: components["schemas"]["RiskSignals"];
             /**
              * Status
              * @default succeeded
              */
             status: string;
-            /**
-             * Synced At
-             * @default null
-             */
+            /** Synced At */
             synced_at: string | null;
         };
         /** ChecklistItem */
@@ -580,14 +564,14 @@ export interface components {
             /** Label */
             label: string;
             /** Note */
-            note?: string | null;
+            note: string | null;
             /**
              * Required
              * @default false
              */
             required: boolean;
             /** Source Ids */
-            source_ids?: string[];
+            source_ids: string[];
             status: components["schemas"]["ChecklistStatus"];
         };
         /**
@@ -595,6 +579,22 @@ export interface components {
          * @enum {string}
          */
         ChecklistStatus: "found" | "partial" | "missing";
+        /**
+         * CitedSource
+         * @description Snapshot of a tool record a sentence cites (shown when hovering a citation).
+         */
+        CitedSource: {
+            /** Data */
+            data: {
+                [key: string]: unknown;
+            };
+            /** Id */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+        };
         /** Customer */
         Customer: {
             /** Email */
@@ -662,15 +662,15 @@ export interface components {
              */
             amount: number;
             /** Baseline Score */
-            baseline_score?: number | null;
+            baseline_score: number | null;
             /** Calendar Event Id */
-            calendar_event_id?: string | null;
-            card?: components["schemas"]["CardSummary"] | null;
+            calendar_event_id: string | null;
+            card: components["schemas"]["CardSummary"] | null;
             category: components["schemas"]["DisputeCategory"];
             /** Charge Id */
             charge_id: string;
             /** Checklist */
-            checklist?: components["schemas"]["ChecklistItem"][];
+            checklist: components["schemas"]["ChecklistItem"][];
             /**
              * Created At
              * Format: date-time
@@ -682,13 +682,13 @@ export interface components {
              */
             currency: string;
             /** Customer Email */
-            customer_email?: string | null;
+            customer_email: string | null;
             /**
              * Due By
              * Format: date-time
              */
             due_by: string;
-            evidence_draft?: components["schemas"]["EvidenceDraft"] | null;
+            evidence_draft: components["schemas"]["EvidenceDraft"] | null;
             /**
              * Id
              * @description Stripe dispute id (dp_...), also the document id
@@ -700,13 +700,13 @@ export interface components {
              */
             livemode: boolean;
             /** Order Id */
-            order_id?: string | null;
-            outcome?: components["schemas"]["DisputeOutcome"] | null;
+            order_id: string | null;
+            outcome: components["schemas"]["DisputeOutcome"] | null;
             /** Proposed Action Id */
-            proposed_action_id?: string | null;
+            proposed_action_id: string | null;
             /** Reason Code */
             reason_code: string;
-            recommendation?: components["schemas"]["Recommendation"] | null;
+            recommendation: components["schemas"]["Recommendation"] | null;
             /** @default needs_response */
             status: components["schemas"]["DisputeStatus"];
             /**
@@ -720,9 +720,9 @@ export interface components {
              */
             updated_at: string;
             /** Win Rationale */
-            win_rationale?: string[];
+            win_rationale: string[];
             /** Win Score */
-            win_score?: number | null;
+            win_score: number | null;
         };
         /**
          * DisputeCategory
@@ -733,6 +733,7 @@ export interface components {
         DisputeDetail: {
             /** Actions */
             actions: components["schemas"]["ProposedAction"][];
+            charge?: components["schemas"]["Charge"] | null;
             dispute: components["schemas"]["Dispute"];
             /** Messages */
             messages: components["schemas"]["Message"][];
@@ -794,13 +795,13 @@ export interface components {
             /** Id */
             id: string;
             /** Source Ids */
-            source_ids?: string[];
+            source_ids: string[];
             /** Supported */
             readonly supported: boolean;
             /** Text */
             text: string;
             /** Unsupported Reason */
-            unsupported_reason?: string | null;
+            unsupported_reason: string | null;
         };
         /** EarlyFraudWarning */
         EarlyFraudWarning: {
@@ -855,7 +856,7 @@ export interface components {
         /** EvidenceDraft */
         EvidenceDraft: {
             /** Cache Key */
-            cache_key?: string | null;
+            cache_key: string | null;
             /**
              * Cached
              * @default false
@@ -869,7 +870,7 @@ export interface components {
                 [key: string]: string[];
             };
             /** Edited By */
-            edited_by?: string | null;
+            edited_by: string | null;
             evidence: components["schemas"]["StripeEvidence"];
             /**
              * Generated At
@@ -877,13 +878,20 @@ export interface components {
              */
             generated_at: string;
             /** Instruction */
-            instruction?: string | null;
+            instruction: string | null;
             /** Missing Evidence */
-            missing_evidence?: string[];
+            missing_evidence: string[];
             /** Model */
             model: string;
             /** Sentences */
-            sentences?: components["schemas"]["DraftSentence"][];
+            sentences: components["schemas"]["DraftSentence"][];
+            /**
+             * Sources
+             * @description The tool records cited by this draft, by id
+             */
+            sources: {
+                [key: string]: components["schemas"]["CitedSource"];
+            };
             /** Unsupported Sentence Ids */
             readonly unsupported_sentence_ids: string[];
         };
@@ -915,19 +923,19 @@ export interface components {
         /** Fulfilment */
         Fulfilment: {
             /** Carrier */
-            carrier?: string | null;
+            carrier: string | null;
             /** Delivered At */
-            delivered_at?: string | null;
+            delivered_at: string | null;
             /** Delivered To Billing Address */
-            delivered_to_billing_address?: boolean | null;
+            delivered_to_billing_address: boolean | null;
             /** Proof Url */
-            proof_url?: string | null;
+            proof_url: string | null;
             /** Shipped At */
-            shipped_at?: string | null;
+            shipped_at: string | null;
             /** Signed By */
-            signed_by?: string | null;
+            signed_by: string | null;
             /** Tracking */
-            tracking?: string | null;
+            tracking: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -994,10 +1002,10 @@ export interface components {
         MessageDirection: "inbound" | "outbound";
         /** Order */
         Order: {
-            billing_address?: components["schemas"]["Address"] | null;
-            card?: components["schemas"]["CardSummary"] | null;
+            billing_address: components["schemas"]["Address"] | null;
+            card: components["schemas"]["CardSummary"] | null;
             /** Charge Id */
-            charge_id?: string | null;
+            charge_id: string | null;
             /**
              * Created At
              * Format: date-time
@@ -1014,14 +1022,14 @@ export interface components {
              * @default false
              */
             digital: boolean;
-            fulfilment?: components["schemas"]["Fulfilment"] | null;
+            fulfilment: components["schemas"]["Fulfilment"] | null;
             /** Id */
             id: string;
             /** Ip */
-            ip?: string | null;
+            ip: string | null;
             /** Items */
             items: components["schemas"]["OrderItem"][];
-            shipping_address?: components["schemas"]["Address"] | null;
+            shipping_address: components["schemas"]["Address"] | null;
             /** @default paid */
             status: components["schemas"]["OrderStatus"];
             /**
@@ -1062,7 +1070,7 @@ export interface components {
              */
             arrival_date: string;
             /** Balance Txn Ids */
-            balance_txn_ids?: string[];
+            balance_txn_ids: string[];
             /**
              * Created
              * Format: date-time
@@ -1086,7 +1094,7 @@ export interface components {
         /** PolicyCheck */
         PolicyCheck: {
             /** Detail */
-            detail?: string | null;
+            detail: string | null;
             /** Name */
             name: string;
             /** Passed */
@@ -1103,20 +1111,20 @@ export interface components {
         /** ProposedAction */
         ProposedAction: {
             /** Amount */
-            amount?: number | null;
+            amount: number | null;
             /** Approved At */
-            approved_at?: string | null;
+            approved_at: string | null;
             /** Approved By */
-            approved_by?: string | null;
+            approved_by: string | null;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
             /** Error */
-            error?: string | null;
+            error: string | null;
             /** Executed At */
-            executed_at?: string | null;
+            executed_at: string | null;
             /**
              * Hash
              * @description sha256 of type+target+canonical payload; approval binds to it
@@ -1125,19 +1133,19 @@ export interface components {
             /** Id */
             id: string;
             /** Idempotency Key */
-            idempotency_key?: string | null;
+            idempotency_key: string | null;
             /** Payload */
             payload: {
                 [key: string]: unknown;
             };
             /** Policy Checks */
-            policy_checks?: components["schemas"]["PolicyCheck"][];
+            policy_checks: components["schemas"]["PolicyCheck"][];
             /** @default agent */
             proposed_by: components["schemas"]["Actor"];
             /** Reason */
-            reason?: string | null;
+            reason: string | null;
             /** Result */
-            result?: {
+            result: {
                 [key: string]: unknown;
             } | null;
             /** @default proposed */
@@ -1272,40 +1280,19 @@ export interface components {
         };
         /** RiskSignals */
         RiskSignals: {
-            /**
-             * Address Line1 Check
-             * @default null
-             */
+            /** Address Line1 Check */
             address_line1_check: string | null;
-            /**
-             * Address Postal Code Check
-             * @default null
-             */
+            /** Address Postal Code Check */
             address_postal_code_check: string | null;
-            /**
-             * Cvc Check
-             * @default null
-             */
+            /** Cvc Check */
             cvc_check: string | null;
-            /**
-             * Network Status
-             * @default null
-             */
+            /** Network Status */
             network_status: string | null;
-            /**
-             * Risk Level
-             * @default null
-             */
+            /** Risk Level */
             risk_level: string | null;
-            /**
-             * Risk Score
-             * @default null
-             */
+            /** Risk Score */
             risk_score: number | null;
-            /**
-             * Three D Secure
-             * @default null
-             */
+            /** Three D Secure */
             three_d_secure: string | null;
         };
         /**
@@ -1314,41 +1301,41 @@ export interface components {
          */
         StripeEvidence: {
             /** Access Activity Log */
-            access_activity_log?: string | null;
+            access_activity_log: string | null;
             /** Billing Address */
-            billing_address?: string | null;
+            billing_address: string | null;
             /** Cancellation Policy Disclosure */
-            cancellation_policy_disclosure?: string | null;
+            cancellation_policy_disclosure: string | null;
             /** Cancellation Rebuttal */
-            cancellation_rebuttal?: string | null;
+            cancellation_rebuttal: string | null;
             /** Customer Email Address */
-            customer_email_address?: string | null;
+            customer_email_address: string | null;
             /** Customer Name */
-            customer_name?: string | null;
+            customer_name: string | null;
             /** Customer Purchase Ip */
-            customer_purchase_ip?: string | null;
+            customer_purchase_ip: string | null;
             /** Duplicate Charge Explanation */
-            duplicate_charge_explanation?: string | null;
+            duplicate_charge_explanation: string | null;
             /** Duplicate Charge Id */
-            duplicate_charge_id?: string | null;
+            duplicate_charge_id: string | null;
             /** Product Description */
-            product_description?: string | null;
+            product_description: string | null;
             /** Refund Policy Disclosure */
-            refund_policy_disclosure?: string | null;
+            refund_policy_disclosure: string | null;
             /** Refund Refusal Explanation */
-            refund_refusal_explanation?: string | null;
+            refund_refusal_explanation: string | null;
             /** Service Date */
-            service_date?: string | null;
+            service_date: string | null;
             /** Shipping Address */
-            shipping_address?: string | null;
+            shipping_address: string | null;
             /** Shipping Carrier */
-            shipping_carrier?: string | null;
+            shipping_carrier: string | null;
             /** Shipping Date */
-            shipping_date?: string | null;
+            shipping_date: string | null;
             /** Shipping Tracking Number */
-            shipping_tracking_number?: string | null;
+            shipping_tracking_number: string | null;
             /** Uncategorized Text */
-            uncategorized_text?: string | null;
+            uncategorized_text: string | null;
         };
         /** Thresholds */
         Thresholds: {

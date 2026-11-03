@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import Field, computed_field
 
@@ -72,6 +72,15 @@ class StripeEvidence(RecoupModel):
     uncategorized_text: str | None = None
 
 
+class CitedSource(RecoupModel):
+    """Snapshot of a tool record a sentence cites (shown when hovering a citation)."""
+
+    id: str
+    kind: str
+    label: str
+    data: dict[str, Any]
+
+
 class DraftSentence(RecoupModel):
     """One claim in the rebuttal and the tool-result records that support it.
 
@@ -104,6 +113,9 @@ class EvidenceDraft(RecoupModel):
     cached: bool = False
     missing_evidence: list[str] = Field(default_factory=list)
     edited_by: str | None = None
+    sources: dict[str, CitedSource] = Field(
+        default_factory=dict, description="The tool records cited by this draft, by id"
+    )
 
     @computed_field  # type: ignore[prop-decorator]
     @property

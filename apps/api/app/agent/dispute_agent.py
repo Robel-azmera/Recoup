@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 from ..models import (
     ActionType,
     Actor,
+    CitedSource,
     Dispute,
     DisputeAnalysis,
     DisputeStatus,
@@ -77,6 +78,12 @@ def assemble(
         generated_at=utcnow(),
         cache_key=cache_key,
         missing_evidence=analysis.missing_evidence,
+        sources={
+            sid: CitedSource.model_validate(facts.records[sid].model_dump())
+            for s in sentences
+            for sid in s.source_ids
+            if sid in facts.records
+        },
     )
 
 

@@ -11,7 +11,7 @@ Money moves only after a person approves it.
 - Spec: [`docs/SOLUTION_DESIGN.md`](docs/SOLUTION_DESIGN.md)
 - Decisions log: [`docs/DECISIONS.md`](docs/DECISIONS.md)
 
-> Status: **Phase 2 (agent core)**. This README grows with each phase.
+> Status: **Phase 3 (W1 in the UI)**. This README grows with each phase.
 
 ## Layout
 
@@ -71,7 +71,8 @@ Without a key, an in-memory mock Stripe fires the same events through the same p
 |---|---|
 | New dispute (W1 intake) | Settings → Demo Console → *Fraudulent dispute*, *Product not received* or *Inquiry*. Or `POST /demo/charges {"scenario":"fraudulent"}` |
 | Early fraud warning (W2 intake) | Demo Console → *Early fraud warning* |
-| Draft / regenerate evidence (W1) | Automatic on every new dispute. Regenerate: `POST /disputes/{id}/draft {"instruction":"stress the delivery photo"}` |
+| Defend a dispute end to end (W1) | Disputes → open one. The workspace shows the timeline, checklist, win score, cited rebuttal and live agent steps. **Regenerate** with an instruction, **Edit**, then **Approve & submit**: a dialog shows the policy checks, and in test mode the dispute closes as *won*. |
+| Draft / regenerate evidence (API) | Automatic on every new dispute. Regenerate: `POST /disputes/{id}/draft {"instruction":"stress the delivery photo"}` |
 | Approve an action | `GET /actions/{id}` returns a 30-minute approval token bound to you and the payload hash; `POST /actions/{id}/approve {"approval_token": ...}` |
 | Stripe sync | Demo Console → *Sync from Stripe now*, or `POST /admin/sync` |
 

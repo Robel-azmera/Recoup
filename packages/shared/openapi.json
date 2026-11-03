@@ -100,7 +100,9 @@
         },
         "required": [
           "line1",
+          "line2",
           "city",
+          "state",
           "postal_code",
           "country"
         ],
@@ -122,6 +124,12 @@
             "$ref": "#/components/schemas/Thresholds"
           }
         },
+        "required": [
+          "thresholds",
+          "auto_policies",
+          "channels",
+          "demo"
+        ],
         "title": "AppSettings",
         "type": "object"
       },
@@ -220,7 +228,13 @@
           "id",
           "ts",
           "actor",
-          "step"
+          "step",
+          "tool",
+          "input",
+          "output",
+          "links",
+          "subject_id",
+          "level"
         ],
         "title": "AuditEntry",
         "type": "object"
@@ -245,6 +259,10 @@
             "title": "Auto Submit Min Score"
           }
         },
+        "required": [
+          "auto_refund_efw",
+          "auto_submit_min_score"
+        ],
         "title": "AutoPolicies",
         "type": "object"
       },
@@ -362,9 +380,17 @@
           "id",
           "type",
           "amount",
+          "fee",
           "net",
+          "currency",
+          "source",
+          "related_charge_id",
+          "payout_id",
           "created",
-          "available_on"
+          "available_on",
+          "description",
+          "fee_details",
+          "synced_at"
         ],
         "title": "BalanceTxn",
         "type": "object"
@@ -426,6 +452,12 @@
             "title": "Telegram Chat Id"
           }
         },
+        "required": [
+          "telegram_chat_id",
+          "owner_email",
+          "brief_telegram",
+          "brief_email"
+        ],
         "title": "Channels",
         "type": "object"
       },
@@ -451,8 +483,7 @@
               {
                 "type": "null"
               }
-            ],
-            "default": null
+            ]
           },
           "created": {
             "format": "date-time",
@@ -473,7 +504,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Email"
           },
           "customer_name": {
@@ -485,7 +515,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Customer Name"
           },
           "disputed": {
@@ -506,7 +535,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Order Id"
           },
           "payment_intent": {
@@ -518,7 +546,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Payment Intent"
           },
           "refunded": {
@@ -544,14 +571,25 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Synced At"
           }
         },
         "required": [
           "id",
           "amount",
-          "created"
+          "currency",
+          "created",
+          "status",
+          "order_id",
+          "customer_email",
+          "customer_name",
+          "card",
+          "risk",
+          "refunded",
+          "amount_refunded",
+          "disputed",
+          "payment_intent",
+          "synced_at"
         ],
         "title": "Charge",
         "type": "object"
@@ -596,7 +634,10 @@
         "required": [
           "key",
           "label",
-          "status"
+          "required",
+          "status",
+          "source_ids",
+          "note"
         ],
         "title": "ChecklistItem",
         "type": "object"
@@ -609,6 +650,36 @@
         ],
         "title": "ChecklistStatus",
         "type": "string"
+      },
+      "CitedSource": {
+        "description": "Snapshot of a tool record a sentence cites (shown when hovering a citation).",
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "data"
+        ],
+        "title": "CitedSource",
+        "type": "object"
       },
       "Customer": {
         "properties": {
@@ -633,7 +704,8 @@
         "required": [
           "id",
           "name",
-          "email"
+          "email",
+          "risky"
         ],
         "title": "Customer",
         "type": "object"
@@ -744,6 +816,9 @@
             "title": "Force Test Outcome"
           }
         },
+        "required": [
+          "force_test_outcome"
+        ],
         "title": "DemoSettings",
         "type": "object"
       },
@@ -930,10 +1005,26 @@
         "required": [
           "id",
           "charge_id",
+          "order_id",
           "amount",
+          "currency",
           "reason_code",
           "category",
           "due_by",
+          "status",
+          "stripe_status",
+          "win_score",
+          "win_rationale",
+          "recommendation",
+          "evidence_draft",
+          "checklist",
+          "outcome",
+          "card",
+          "customer_email",
+          "calendar_event_id",
+          "baseline_score",
+          "proposed_action_id",
+          "livemode",
           "created_at",
           "updated_at"
         ],
@@ -961,6 +1052,16 @@
             },
             "title": "Actions",
             "type": "array"
+          },
+          "charge": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Charge"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "dispute": {
             "$ref": "#/components/schemas/Dispute"
@@ -1017,6 +1118,7 @@
         },
         "required": [
           "result",
+          "amount_recovered",
           "closed_at"
         ],
         "title": "DisputeOutcome",
@@ -1125,6 +1227,9 @@
           "id",
           "field",
           "text",
+          "source_ids",
+          "author",
+          "unsupported_reason",
           "supported"
         ],
         "title": "DraftSentence",
@@ -1210,7 +1315,14 @@
         "required": [
           "id",
           "charge_id",
+          "order_id",
           "fraud_type",
+          "actionable",
+          "amount",
+          "currency",
+          "status",
+          "recommendation",
+          "proposed_action_id",
           "created"
         ],
         "title": "EarlyFraudWarning",
@@ -1294,6 +1406,14 @@
             "title": "Sentences",
             "type": "array"
           },
+          "sources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CitedSource"
+            },
+            "description": "The tool records cited by this draft, by id",
+            "title": "Sources",
+            "type": "object"
+          },
           "unsupported_sentence_ids": {
             "items": {
               "type": "string"
@@ -1305,8 +1425,15 @@
         },
         "required": [
           "evidence",
+          "sentences",
+          "instruction",
           "model",
           "generated_at",
+          "cache_key",
+          "cached",
+          "missing_evidence",
+          "edited_by",
+          "sources",
           "citations",
           "unsupported_sentence_ids"
         ],
@@ -1356,7 +1483,8 @@
         },
         "required": [
           "amount",
-          "type"
+          "type",
+          "description"
         ],
         "title": "FeeDetail",
         "type": "object"
@@ -1443,6 +1571,15 @@
             "title": "Tracking"
           }
         },
+        "required": [
+          "carrier",
+          "tracking",
+          "shipped_at",
+          "delivered_at",
+          "proof_url",
+          "signed_by",
+          "delivered_to_billing_address"
+        ],
         "title": "Fulfilment",
         "type": "object"
       },
@@ -1704,9 +1841,18 @@
         },
         "required": [
           "id",
+          "charge_id",
           "customer",
           "items",
           "total",
+          "currency",
+          "shipping_address",
+          "billing_address",
+          "fulfilment",
+          "ip",
+          "card",
+          "status",
+          "digital",
           "created_at"
         ],
         "title": "Order",
@@ -1806,9 +1952,12 @@
         "required": [
           "id",
           "amount",
+          "currency",
           "status",
           "created",
-          "arrival_date"
+          "arrival_date",
+          "balance_txn_ids",
+          "synced_at"
         ],
         "title": "Payout",
         "type": "object"
@@ -1837,7 +1986,8 @@
         },
         "required": [
           "name",
-          "passed"
+          "passed",
+          "detail"
         ],
         "title": "PolicyCheck",
         "type": "object"
@@ -2002,6 +2152,17 @@
           "target_id",
           "payload",
           "hash",
+          "amount",
+          "reason",
+          "status",
+          "proposed_by",
+          "policy_checks",
+          "approved_by",
+          "approved_at",
+          "executed_at",
+          "idempotency_key",
+          "result",
+          "error",
           "created_at"
         ],
         "title": "ProposedAction",
@@ -2103,8 +2264,13 @@
           "run_id",
           "type",
           "amount",
+          "currency",
           "refs",
           "detail",
+          "explanation",
+          "suggested_action",
+          "status",
+          "snoozed_until",
           "detected_at"
         ],
         "title": "ReconException",
@@ -2197,7 +2363,13 @@
           "id",
           "period_start",
           "period_end",
-          "started_at"
+          "started_at",
+          "finished_at",
+          "matched",
+          "exception_count",
+          "payouts_checked",
+          "total_settled",
+          "status"
         ],
         "title": "ReconRun",
         "type": "object"
@@ -2230,7 +2402,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Address Line1 Check"
           },
           "address_postal_code_check": {
@@ -2242,7 +2413,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Address Postal Code Check"
           },
           "cvc_check": {
@@ -2254,7 +2424,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Cvc Check"
           },
           "network_status": {
@@ -2266,7 +2435,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Network Status"
           },
           "risk_level": {
@@ -2278,7 +2446,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Risk Level"
           },
           "risk_score": {
@@ -2290,7 +2457,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Risk Score"
           },
           "three_d_secure": {
@@ -2302,10 +2468,18 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Three D Secure"
           }
         },
+        "required": [
+          "cvc_check",
+          "address_line1_check",
+          "address_postal_code_check",
+          "three_d_secure",
+          "risk_level",
+          "risk_score",
+          "network_status"
+        ],
         "title": "RiskSignals",
         "type": "object"
       },
@@ -2511,6 +2685,26 @@
             "title": "Uncategorized Text"
           }
         },
+        "required": [
+          "product_description",
+          "customer_name",
+          "customer_email_address",
+          "customer_purchase_ip",
+          "billing_address",
+          "shipping_address",
+          "shipping_carrier",
+          "shipping_tracking_number",
+          "shipping_date",
+          "service_date",
+          "access_activity_log",
+          "refund_policy_disclosure",
+          "refund_refusal_explanation",
+          "cancellation_policy_disclosure",
+          "cancellation_rebuttal",
+          "duplicate_charge_explanation",
+          "duplicate_charge_id",
+          "uncategorized_text"
+        ],
         "title": "StripeEvidence",
         "type": "object"
       },
@@ -2542,6 +2736,13 @@
             "type": "integer"
           }
         },
+        "required": [
+          "auto_refund_max_amount",
+          "fight_min_amount",
+          "max_refund_amount",
+          "dispute_rate_threshold",
+          "deadline_alert_hours"
+        ],
         "title": "Thresholds",
         "type": "object"
       },

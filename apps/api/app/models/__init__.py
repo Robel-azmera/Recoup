@@ -19,6 +19,7 @@ from .common import Address, CardSummary, RecoupModel, to_doc, utcnow
 from .disputes import (
     ChecklistItem,
     ChecklistStatus,
+    CitedSource,
     Dispute,
     DisputeCategory,
     DisputeOutcome,
@@ -83,6 +84,7 @@ __all__ = [
     "Charge",
     "ChecklistItem",
     "ChecklistStatus",
+    "CitedSource",
     "Customer",
     "DemoSettings",
     "Dispute",
