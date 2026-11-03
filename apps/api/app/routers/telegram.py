@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from ..auth import CurrentUser
 from ..deps import Container, get_container
-from ..integrations.notify import OUTBOX
+from ..integrations.notify import OUTBOX, keyboard_from_doc
 
 router = APIRouter(tags=["notifications"])
 _fake_ids = itertools.count(10_000_000)
@@ -75,4 +75,8 @@ async def outbox(
 ) -> list[OutboxItem]:
     """What the mock Telegram / Calendar / email clients 'sent' (newest first)."""
     docs = await c.store.query(OUTBOX, order_by="sent_at", descending=True, limit=60)
-    return [OutboxItem.model_validate(d) for d in docs if d.get("channel") != "telegram_toast"]
+    return [
+        OutboxItem.model_validate({**d, "buttons": keyboard_from_doc(d.get("buttons"))})
+        for d in docs
+        if d.get("channel") != "telegram_toast"
+    ]

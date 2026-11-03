@@ -23,6 +23,15 @@ OUTBOX = "_mock_outbox"
 Buttons = list[list[dict[str, str]]]  # Telegram inline_keyboard rows
 
 
+def keyboard_to_doc(rows: Buttons | None) -> list[dict[str, Any]]:
+    """Firestore can't store nested arrays, so a keyboard is stored as [{row: [...]}, ...]."""
+    return [{"row": list(r)} for r in rows or []]
+
+
+def keyboard_from_doc(value: Any) -> Buttons:
+    return [r["row"] if isinstance(r, dict) else r for r in value or []]
+
+
 class NotifyError(Exception):
     pass
 
@@ -125,7 +134,7 @@ class MockTelegram:
                 "chat_id": chat_id,
                 "message_id": mid,
                 "text": text,
-                "buttons": buttons or [],
+                "buttons": keyboard_to_doc(buttons),
                 "sent_at": utcnow().isoformat(),
                 "edited_at": None,
             },
@@ -138,7 +147,7 @@ class MockTelegram:
         await self._store.set(
             OUTBOX,
             f"tg_{message_id}",
-            {"text": text, "buttons": buttons or [], "edited_at": utcnow().isoformat()},
+            {"text": text, "buttons": keyboard_to_doc(buttons), "edited_at": utcnow().isoformat()},
             merge=True,
         )
 

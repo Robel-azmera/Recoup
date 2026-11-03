@@ -53,3 +53,10 @@ async def test_memory_store_create_is_idempotent() -> None:
     await s.set("disputes", "dp_2", {"amount": 9, "status": "x"})
     rows = await s.query("disputes", [("amount", ">", 6)])
     assert [r["amount"] for r in rows] == [9]
+
+
+async def test_memory_store_rejects_nested_arrays_like_firestore() -> None:
+    s = MemoryStore()
+    with pytest.raises(ValueError, match="nested arrays"):
+        await s.set("c", "d", {"buttons": [[{"text": "x"}]]})
+    await s.set("c", "d", {"buttons": [{"row": [{"text": "x"}]}]})  # the stored form is fine

@@ -136,7 +136,11 @@ class ScriptedLLM:
 
     async def generate(self, system: str, history: list[Turn], tools: list[dict[str, Any]]) -> Turn:
         self.calls.append(list(history))
-        return self.turns.pop(0) if self.turns else Turn(role="model", text="done")
+        item: Any = self.turns.pop(0) if self.turns else Turn(role="model", text="done")
+        if isinstance(item, Exception):
+            raise item
+        turn: Turn = item
+        return turn
 
     async def generate_structured(self, system: str, history: list[Turn], schema: type[T]) -> T:
         self.calls.append(list(history))

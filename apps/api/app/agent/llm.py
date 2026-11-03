@@ -44,14 +44,22 @@ class Turn:
     text: str | None = None
     function_calls: list[FunctionCall] = field(default_factory=list)
     tool_responses: list[ToolResponse] = field(default_factory=list)
+    # Provider-native model content, replayed verbatim. Gemini 3 models attach a
+    # thought_signature to function-call parts and reject history that lacks it.
+    raw: Any = None
 
 
 class LLMError(Exception):
     pass
 
 
+class QuotaExhausted(LLMError):
+    """A model's daily quota is used up: retrying won't help until it resets."""
+
+
 class LLM(Protocol):
-    model_name: str
+    @property
+    def model_name(self) -> str: ...
 
     async def generate(
         self, system: str, history: list[Turn], tools: list[dict[str, Any]]
@@ -90,6 +98,7 @@ class RateLimiter:
 
 
 RETRYABLE = {429, 500, 502, 503, 504}
+REQUEST_TIMEOUT_S = 60  # a hung request is retried, then falls back
 
 
 async def with_retry(
@@ -100,8 +109,15 @@ async def with_retry(
 
     for attempt in range(attempts):
         try:
-            return await fn()
+            return await asyncio.wait_for(fn(), REQUEST_TIMEOUT_S)
+        except TimeoutError as e:
+            if attempt == attempts - 1:
+                raise LLMError(f"Gemini timed out after {REQUEST_TIMEOUT_S}s") from e
+            log.warning("gemini timeout, retrying", extra={"fields": {"attempt": attempt}})
+            await sleep(base * 2**attempt)
         except errors.APIError as e:
+            if e.code == 429 and "PerDay" in str(e):
+                raise QuotaExhausted(f"Gemini daily quota exhausted: {str(e)[:160]}") from e
             if e.code not in RETRYABLE or attempt == attempts - 1:
                 raise LLMError(f"Gemini error {e.code}: {e}") from e
             delay = base * 2**attempt + random.uniform(0, 1)
@@ -116,12 +132,24 @@ async def with_retry(
 
 
 class GeminiLLM:
-    def __init__(self, api_key: str, model: str, limiter: RateLimiter) -> None:
+    def __init__(
+        self, api_key: str, model: str, limiter: RateLimiter, fallbacks: list[str] | None = None
+    ) -> None:
         from google import genai
 
         self._client = genai.Client(api_key=api_key)
-        self.model_name = model
+        self._models = [model, *(fallbacks or [])]
+        self._exhausted: dict[str, float] = {}  # model -> monotonic time it may be tried again
         self._limiter = limiter
+
+    @property
+    def model_name(self) -> str:
+        """First model in the chain whose daily quota isn't exhausted."""
+        now = time.monotonic()
+        for m in self._models:
+            if self._exhausted.get(m, 0) <= now:
+                return m
+        return self._models[0]
 
     @staticmethod
     def _contents(history: list[Turn]) -> list[Any]:
@@ -133,6 +161,8 @@ class GeminiLLM:
                 out.append(
                     types.Content(role="user", parts=[types.Part.from_text(text=t.text or "")])
                 )
+            elif t.role == "model" and t.raw is not None:
+                out.append(t.raw)  # verbatim: keeps thought signatures
             elif t.role == "model":
                 parts: list[Any] = []
                 if t.text:
@@ -159,13 +189,26 @@ class GeminiLLM:
         return out
 
     async def _call(self, contents: list[Any], config: Any) -> Any:
-        async def once() -> Any:
-            await self._limiter.acquire()
-            return await self._client.aio.models.generate_content(
-                model=self.model_name, contents=contents, config=config
-            )
+        """Use the first model with quota left; on daily-quota exhaustion move down the chain."""
+        last: LLMError | None = None
+        for _ in self._models:
+            model = self.model_name
+            if self._exhausted.get(model, 0) > time.monotonic():
+                break  # every model in the chain is exhausted
 
-        return await with_retry(once)
+            async def once(m: str = model) -> Any:
+                await self._limiter.acquire()
+                return await self._client.aio.models.generate_content(
+                    model=m, contents=contents, config=config
+                )
+
+            try:
+                return await with_retry(once)
+            except QuotaExhausted as e:
+                log.warning("gemini daily quota exhausted", extra={"fields": {"model": model}})
+                self._exhausted[model] = time.monotonic() + 6 * 3600
+                last = e
+        raise last or LLMError("every Gemini model in the chain is out of quota")
 
     async def generate(self, system: str, history: list[Turn], tools: list[dict[str, Any]]) -> Turn:
         from google.genai import types
@@ -190,12 +233,13 @@ class GeminiLLM:
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         resp = await self._call(self._contents(history), config)
+        raw = resp.candidates[0].content if getattr(resp, "candidates", None) else None
         calls = [
             FunctionCall(name=fc.name or "", args=dict(fc.args or {}), id=fc.id)
             for fc in (resp.function_calls or [])
         ]
         text = None if calls else (resp.text or "")
-        return Turn(role="model", text=text, function_calls=calls)
+        return Turn(role="model", text=text, function_calls=calls, raw=raw)
 
     async def generate_structured(self, system: str, history: list[Turn], schema: type[T]) -> T:
         from google.genai import types

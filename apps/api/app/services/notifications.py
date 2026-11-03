@@ -17,7 +17,14 @@ import secrets
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
-from ..integrations.notify import Buttons, CalendarClient, EmailClient, TelegramClient
+from ..integrations.notify import (
+    Buttons,
+    CalendarClient,
+    EmailClient,
+    TelegramClient,
+    keyboard_from_doc,
+    keyboard_to_doc,
+)
 from ..models import (
     ActionStatus,
     ActionType,
@@ -66,7 +73,9 @@ class NotificationService:
 
     async def _exec_telegram(self, a: ProposedAction) -> dict[str, Any]:
         p = a.payload
-        mid = await self.telegram.send_message(p["chat_id"], p["text"], p.get("buttons"))
+        mid = await self.telegram.send_message(
+            p["chat_id"], p["text"], keyboard_from_doc(p.get("buttons"))
+        )
         for ref in p.get("refs", []):
             await self.c.store.set(REFS, ref, {"message_id": mid}, merge=True)
         return {"message_id": mid}
@@ -103,6 +112,8 @@ class NotificationService:
     async def _send(
         self, type_: ActionType, target: str, payload: dict[str, Any], reason: str
     ) -> ProposedAction:
+        if "buttons" in payload:
+            payload = {**payload, "buttons": keyboard_to_doc(payload["buttons"])}
         a = await self.c.gate.propose(
             type_, target, payload, reason=reason, proposed_by=Actor.system, supersede=False
         )
@@ -141,6 +152,15 @@ class NotificationService:
             [{"text": submit_label, "callback_data": f"ap:{ref}"}, edit],
             [{"text": "Accept loss", "callback_data": f"ac:{ref}"}],
         ]
+
+    async def ensure_alerted(self, d: Dispute) -> bool:
+        """Send the new-dispute alert once per dispute, after its first successful draft
+        (even if the first drafting attempt failed). Returns True if it sent now."""
+        for a in await self.c.gate.list_for(d.id):
+            if a.type == ActionType.send_telegram and a.payload.get("kind") == "dispute_alert":
+                return False
+        await self.dispute_ready(d)
+        return True
 
     async def dispute_ready(self, d: Dispute) -> None:
         """After the first draft: Telegram alert with buttons + calendar event at due_by - 48h."""

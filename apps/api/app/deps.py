@@ -56,8 +56,12 @@ class Container:
 
 def build_llm(settings: Settings) -> LLM:
     if settings.gemini_api_key:
+        fallbacks = [m.strip() for m in settings.gemini_fallback_models.split(",") if m.strip()]
         return GeminiLLM(
-            settings.gemini_api_key, settings.gemini_model, RateLimiter(settings.gemini_rpm)
+            settings.gemini_api_key,
+            settings.gemini_model,
+            RateLimiter(settings.gemini_rpm),
+            fallbacks,
         )
     return MockLLM()
 
@@ -135,7 +139,7 @@ def build_container(
 
         async def draft_and_alert(dispute_id: str) -> None:
             drafted = await c.agent.draft(dispute_id)
-            await c.notifier.dispute_ready(drafted)
+            await c.notifier.ensure_alerted(drafted)
 
         async def draft_new(d: Dispute) -> None:
             c.tasks.spawn(draft_and_alert(d.id), name=f"draft:{d.id}")

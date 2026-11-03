@@ -7,6 +7,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.deps import Container
+from app.integrations.notify import keyboard_from_doc
 from app.jobs.daily import run_daily
 from app.models import ActionStatus, AppSettings, DisputeStatus, utcnow
 from app.seed_data import build_dataset
@@ -49,7 +50,7 @@ async def test_efw_refund_from_telegram_emails_customer_and_flags_risky(
     [msg] = [m for m in await outbox(seeded, "telegram") if "Early fraud warning" in m["text"]]
     rf = next(
         b["callback_data"]
-        for row in msg["buttons"]
+        for row in keyboard_from_doc(msg["buttons"])
         for b in row
         if b["callback_data"].startswith("rf:")
     )
@@ -62,7 +63,7 @@ async def test_efw_refund_from_telegram_emails_customer_and_flags_risky(
     [msg] = [m for m in await outbox(seeded, "telegram") if m["message_id"] == msg["message_id"]]
     confirm = next(
         b["callback_data"]
-        for row in msg["buttons"]
+        for row in keyboard_from_doc(msg["buttons"])
         for b in row
         if b["callback_data"].startswith("rfy:")
     )

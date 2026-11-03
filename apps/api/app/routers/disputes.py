@@ -103,7 +103,8 @@ async def draft(
 
     async def run() -> None:
         try:
-            await c.agent.draft(dispute_id, body.instruction)
+            drafted = await c.agent.draft(dispute_id, body.instruction)
+            await c.notifier.ensure_alerted(drafted)
         except DisputeAgentError:
             pass  # already audited
 

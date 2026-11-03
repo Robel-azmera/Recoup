@@ -7,7 +7,13 @@ import pytest
 from httpx import AsyncClient
 
 from app.deps import Container
-from app.integrations.notify import NotifyError, RealEmail, RealTelegram, calendar_event_id
+from app.integrations.notify import (
+    NotifyError,
+    RealEmail,
+    RealTelegram,
+    calendar_event_id,
+    keyboard_from_doc,
+)
 from app.models import ActionStatus, ActionType, DisputeStatus, to_doc, utcnow
 from app.seed_data import build_dataset
 from app.services.demo import seed
@@ -31,7 +37,7 @@ async def alert_for(c: Container, order_id: str) -> tuple[Any, dict[str, Any]]:
 
 
 def button(msg: dict[str, Any], prefix: str) -> str:
-    for row in msg["buttons"]:
+    for row in keyboard_from_doc(msg["buttons"]):
         for b in row:
             if b.get("callback_data", "").startswith(prefix + ":"):
                 return b["callback_data"]
@@ -240,3 +246,13 @@ async def test_real_telegram_and_resend_clients() -> None:
     )
     with pytest.raises(NotifyError):
         await mail.send(to="x@y.z", subject="s", html="h", text="t", idempotency_key="boom")
+
+
+async def test_alert_is_sent_once_even_after_redrafts(seeded: Container) -> None:
+    d = (await seeded.disputes.list())[0]
+    assert await seeded.notifier.ensure_alerted(d) is False  # the seed already alerted
+    before = len([m for m in await outbox(seeded, "telegram") if "New dispute" in m["text"]])
+    await seeded.agent.draft(d.id, "again")
+    assert await seeded.notifier.ensure_alerted(d) is False
+    after = len([m for m in await outbox(seeded, "telegram") if "New dispute" in m["text"]])
+    assert before == after == 6

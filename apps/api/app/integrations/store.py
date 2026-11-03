@@ -67,6 +67,18 @@ def _match(doc: Doc, f: Filter) -> bool:
     return False
 
 
+def check_firestore_value(value: Any, path: str = "", in_array: bool = False) -> None:
+    """Raise like Firestore does for values it can't store (nested arrays)."""
+    if isinstance(value, list):
+        if in_array:
+            raise ValueError(f"Firestore cannot store nested arrays (at {path or 'root'})")
+        for i, v in enumerate(value):
+            check_firestore_value(v, f"{path}[{i}]", True)
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            check_firestore_value(v, f"{path}.{k}" if path else str(k), False)
+
+
 class MemoryStore:
     def __init__(self) -> None:
         self.data: dict[str, dict[str, Doc]] = {}
@@ -79,6 +91,7 @@ class MemoryStore:
         return {**copy.deepcopy(doc), "id": doc_id} if doc is not None else None
 
     async def set(self, collection: str, doc_id: str, data: Doc, merge: bool = False) -> None:
+        check_firestore_value(data)
         col = self._col(collection)
         if merge and doc_id in col:
             col[doc_id] = {**col[doc_id], **copy.deepcopy(data)}
@@ -86,6 +99,7 @@ class MemoryStore:
             col[doc_id] = copy.deepcopy(data)
 
     async def create(self, collection: str, doc_id: str, data: Doc) -> bool:
+        check_firestore_value(data)
         col = self._col(collection)
         if doc_id in col:
             return False

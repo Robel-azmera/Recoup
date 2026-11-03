@@ -208,14 +208,42 @@ class DisputeAgent:
     async def _run_llm(
         self, d: Dispute, pb: Any, instruction: str | None, fight_min: int
     ) -> tuple[Facts, DisputeAnalysis, str]:
-        loop = await run_tool_loop(
-            self.c,
-            self.llm,
-            system=DISPUTE_SYSTEM,
-            prompt=task_prompt(d, pb, instruction),
-            tool_names=list(pb.tools),
-            subject_id=d.id,
-        )
+        prompt = task_prompt(d, pb, instruction)
+        try:
+            loop = await run_tool_loop(
+                self.c,
+                self.llm,
+                system=DISPUTE_SYSTEM,
+                prompt=prompt,
+                tool_names=list(pb.tools),
+                subject_id=d.id,
+            )
+        except LLMError as e:
+            # Model unavailable while gathering evidence (quota, outage, bad request): gather it
+            # deterministically with the same tools and draft from the records. A dispute never
+            # ends up without a draft because the model failed.
+            await self.c.audit.log(
+                "agent.llm_fallback",
+                actor=Actor.agent,
+                subject_id=d.id,
+                output={"error": str(e)[:300], "stage": "tool_loop"},
+                level="warn",
+            )
+            from .mock_llm import MockLLM
+
+            loop = await run_tool_loop(
+                self.c,
+                MockLLM(),
+                system=DISPUTE_SYSTEM,
+                prompt=prompt,
+                tool_names=list(pb.tools),
+                subject_id=d.id,
+            )
+            facts = Facts(loop.records)
+            checklist = evaluate(pb, facts)
+            baseline = baseline_score(pb, checklist)
+            analysis = deterministic_analysis(facts, pb, checklist, baseline, instruction)
+            return facts, analysis, "deterministic-fallback"
         facts = Facts(loop.records)
         checklist = evaluate(pb, facts)
         baseline = baseline_score(pb, checklist)

@@ -31,7 +31,9 @@ class Settings(BaseSettings):
     stripe_webhook_secret: str = ""
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash"
+    # Tried in order when a model's daily free-tier quota runs out (each model has its own quota)
+    gemini_fallback_models: str = "gemini-3.5-flash-lite,gemini-3.1-flash-lite"
     gemini_rpm: int = 8
 
     telegram_bot_token: str = ""
