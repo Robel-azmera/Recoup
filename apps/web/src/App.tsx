@@ -8,6 +8,7 @@ import { Disputes } from './pages/Disputes';
 import { Login } from './pages/Login';
 import { Overview } from './pages/Overview';
 import { Placeholder } from './pages/Placeholder';
+import { Reconciliation } from './pages/Reconciliation';
 import { Settings } from './pages/Settings';
 
 export default function App() {
@@ -24,10 +25,7 @@ function AuthedApp({ onLogout }: { onLogout: () => void }) {
         <Route path="/" element={<Overview />} />
         <Route path="/disputes" element={<Disputes />} />
         <Route path="/disputes/:id" element={<DisputeWorkspace />} />
-        <Route
-          path="/reconciliation"
-          element={<Placeholder title="Reconciliation" phase="Phase 4" />}
-        />
+        <Route path="/reconciliation" element={<Reconciliation />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Placeholder title="Not found" phase="never" />} />
       </Routes>

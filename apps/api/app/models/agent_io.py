@@ -53,3 +53,17 @@ class DisputeAnalysis(RecoupModel):
     recommendation: Recommendation
     claims: list[DraftClaim] = Field(description="The rebuttal, one grounded sentence per claim")
     missing_evidence: list[str] = Field(default_factory=list)
+
+
+class ExceptionExplanation(RecoupModel):
+    exception_id: str
+    explanation: str = Field(
+        description="2-3 plain-language sentences: what happened and the likely cause"
+    )
+    suggested_action: str = Field(description="One concrete next step for the analyst")
+
+
+class ReconExplanations(RecoupModel):
+    """Structured output of the reconciliation explainer (Gemini response schema)."""
+
+    items: list[ExceptionExplanation]

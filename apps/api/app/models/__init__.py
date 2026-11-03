@@ -14,7 +14,15 @@ from .actions import (
     Thresholds,
     WebhookEventRecord,
 )
-from .agent_io import DisputeAnalysis, DraftClaim, NarrativeField, SourceRecord, ToolResult
+from .agent_io import (
+    DisputeAnalysis,
+    DraftClaim,
+    ExceptionExplanation,
+    NarrativeField,
+    ReconExplanations,
+    SourceRecord,
+    ToolResult,
+)
 from .common import Address, CardSummary, RecoupModel, to_doc, utcnow
 from .disputes import (
     ChecklistItem,
@@ -96,6 +104,7 @@ __all__ = [
     "DraftSentence",
     "EarlyFraudWarning",
     "EvidenceDraft",
+    "ExceptionExplanation",
     "FeeDetail",
     "Fulfilment",
     "Message",
@@ -112,6 +121,7 @@ __all__ = [
     "ReconException",
     "ReconExceptionStatus",
     "ReconExceptionType",
+    "ReconExplanations",
     "ReconRun",
     "RecoupModel",
     "RiskSignals",

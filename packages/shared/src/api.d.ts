@@ -284,6 +284,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/recon/exceptions/{exception_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update Exception
+         * @description Analyst triage. These change Recoup's own records only (no money moves), so they don't
+         *     go through the policy gate; each one is audited.
+         */
+        post: operations["update_exception_recon_exceptions__exception_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recon/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Payouts
+         * @description Payout -> balance transactions -> orders, annotated with exceptions (match view).
+         */
+        get: operations["payouts_recon_payouts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recon/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Now
+         * @description 'Run reconciliation now'. The same job the daily scheduler triggers.
+         */
+        post: operations["run_now_recon_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/recon/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Summary */
+        get: operations["summary_recon_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/webhooks/stripe": {
         parameters: {
             query?: never;
@@ -425,10 +503,7 @@ export interface components {
              * @default usd
              */
             currency: string;
-            /**
-             * Description
-             * @default null
-             */
+            /** Description */
             description: string | null;
             /**
              * Fee
@@ -445,25 +520,13 @@ export interface components {
              * @description Amount in minor units (e.g. cents)
              */
             net: number;
-            /**
-             * Payout Id
-             * @default null
-             */
+            /** Payout Id */
             payout_id: string | null;
-            /**
-             * Related Charge Id
-             * @default null
-             */
+            /** Related Charge Id */
             related_charge_id: string | null;
-            /**
-             * Source
-             * @default null
-             */
+            /** Source */
             source: string | null;
-            /**
-             * Synced At
-             * @default null
-             */
+            /** Synced At */
             synced_at: string | null;
             /** Type */
             type: string;
@@ -905,6 +968,21 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** ExceptionUpdate */
+        ExceptionUpdate: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "resolve" | "snooze" | "expected" | "reopen";
+            /** Note */
+            note?: string | null;
+            /**
+             * Snooze Days
+             * @default 3
+             */
+            snooze_days: number;
+        };
         /** FeeDetail */
         FeeDetail: {
             /**
@@ -912,10 +990,7 @@ export interface components {
              * @description Amount in minor units (e.g. cents)
              */
             amount: number;
-            /**
-             * Description
-             * @default null
-             */
+            /** Description */
             description: string | null;
             /** Type */
             type: string;
@@ -1085,11 +1160,26 @@ export interface components {
             id: string;
             /** Status */
             status: string;
-            /**
-             * Synced At
-             * @default null
-             */
+            /** Synced At */
             synced_at: string | null;
+        };
+        /** PayoutLine */
+        PayoutLine: {
+            /** Exception Ids */
+            exception_ids: string[];
+            /** Order Id */
+            order_id: string | null;
+            txn: components["schemas"]["BalanceTxn"];
+        };
+        /** PayoutView */
+        PayoutView: {
+            /** Exception Ids */
+            exception_ids: string[];
+            /** Lines */
+            lines: components["schemas"]["PayoutLine"][];
+            /** Net Total */
+            net_total: number;
+            payout: components["schemas"]["Payout"];
         };
         /** PolicyCheck */
         PolicyCheck: {
@@ -1184,31 +1274,32 @@ export interface components {
              * Format: date-time
              */
             detected_at: string;
-            /**
-             * Explanation
-             * @default null
-             */
+            /** Explained By */
+            explained_by: string | null;
+            /** Explanation */
             explanation: string | null;
             /**
              * Id
              * @description Deterministic hash of type+refs so re-runs don't duplicate
              */
             id: string;
+            /** Last Seen At */
+            last_seen_at: string | null;
             /** Refs */
             refs: string[];
+            /** Resolution */
+            resolution: string | null;
+            /** Resolved At */
+            resolved_at: string | null;
+            /** Resolved By */
+            resolved_by: string | null;
             /** Run Id */
             run_id: string;
-            /**
-             * Snoozed Until
-             * @default null
-             */
+            /** Snoozed Until */
             snoozed_until: string | null;
             /** @default open */
             status: components["schemas"]["ReconExceptionStatus"];
-            /**
-             * Suggested Action
-             * @default null
-             */
+            /** Suggested Action */
             suggested_action: string | null;
             type: components["schemas"]["ReconExceptionType"];
         };
@@ -1225,14 +1316,22 @@ export interface components {
         /** ReconRun */
         ReconRun: {
             /**
+             * Auto Resolved
+             * @default 0
+             */
+            auto_resolved: number;
+            /** By Type */
+            by_type: {
+                [key: string]: number;
+            };
+            /** Error */
+            error: string | null;
+            /**
              * Exception Count
              * @default 0
              */
             exception_count: number;
-            /**
-             * Finished At
-             * @default null
-             */
+            /** Finished At */
             finished_at: string | null;
             /** Id */
             id: string;
@@ -1241,6 +1340,17 @@ export interface components {
              * @default 0
              */
             matched: number;
+            /**
+             * New Exceptions
+             * @default 0
+             */
+            new_exceptions: number;
+            /**
+             * Open Discrepancy
+             * @description Sum of |amount| of open exceptions
+             * @default 0
+             */
+            open_discrepancy: number;
             /**
              * Payouts Checked
              * @default 0
@@ -1272,6 +1382,12 @@ export interface components {
              * @default 0
              */
             total_settled: number;
+        };
+        /** ReconSummary */
+        ReconSummary: {
+            /** Exceptions */
+            exceptions: components["schemas"]["ReconException"][];
+            run: components["schemas"]["ReconRun"] | null;
         };
         /** RejectRequest */
         RejectRequest: {
@@ -1891,6 +2007,138 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    update_exception_recon_exceptions__exception_id__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                exception_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExceptionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconException"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    payouts_recon_payouts_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayoutView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_now_recon_run_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconRun"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    summary_recon_summary_get: {
+        parameters: {
+            query?: {
+                status?: "open" | "snoozed" | "resolved" | "expected" | "all";
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReconSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

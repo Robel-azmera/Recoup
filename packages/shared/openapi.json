@@ -297,7 +297,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Description"
           },
           "fee": {
@@ -331,7 +330,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Payout Id"
           },
           "related_charge_id": {
@@ -343,7 +341,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Related Charge Id"
           },
           "source": {
@@ -355,7 +352,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Source"
           },
           "synced_at": {
@@ -368,7 +364,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Synced At"
           },
           "type": {
@@ -1457,6 +1452,44 @@
         "title": "EvidenceEdit",
         "type": "object"
       },
+      "ExceptionUpdate": {
+        "properties": {
+          "action": {
+            "enum": [
+              "resolve",
+              "snooze",
+              "expected",
+              "reopen"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "snooze_days": {
+            "default": 3,
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Snooze Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ExceptionUpdate",
+        "type": "object"
+      },
       "FeeDetail": {
         "properties": {
           "amount": {
@@ -1473,7 +1506,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Description"
           },
           "type": {
@@ -1945,7 +1977,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Synced At"
           }
         },
@@ -1960,6 +1991,71 @@
           "synced_at"
         ],
         "title": "Payout",
+        "type": "object"
+      },
+      "PayoutLine": {
+        "properties": {
+          "exception_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Exception Ids",
+            "type": "array"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "txn": {
+            "$ref": "#/components/schemas/BalanceTxn"
+          }
+        },
+        "required": [
+          "txn",
+          "order_id",
+          "exception_ids"
+        ],
+        "title": "PayoutLine",
+        "type": "object"
+      },
+      "PayoutView": {
+        "properties": {
+          "exception_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Exception Ids",
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PayoutLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          },
+          "net_total": {
+            "title": "Net Total",
+            "type": "integer"
+          },
+          "payout": {
+            "$ref": "#/components/schemas/Payout"
+          }
+        },
+        "required": [
+          "payout",
+          "lines",
+          "net_total",
+          "exception_ids"
+        ],
+        "title": "PayoutView",
         "type": "object"
       },
       "PolicyCheck": {
@@ -2198,6 +2294,17 @@
             "title": "Detected At",
             "type": "string"
           },
+          "explained_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explained By"
+          },
           "explanation": {
             "anyOf": [
               {
@@ -2207,7 +2314,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Explanation"
           },
           "id": {
@@ -2215,12 +2321,58 @@
             "title": "Id",
             "type": "string"
           },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen At"
+          },
           "refs": {
             "items": {
               "type": "string"
             },
             "title": "Refs",
             "type": "array"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "resolved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By"
           },
           "run_id": {
             "title": "Run Id",
@@ -2236,7 +2388,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Snoozed Until"
           },
           "status": {
@@ -2252,7 +2403,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Suggested Action"
           },
           "type": {
@@ -2271,7 +2421,12 @@
           "suggested_action",
           "status",
           "snoozed_until",
-          "detected_at"
+          "detected_at",
+          "last_seen_at",
+          "explained_by",
+          "resolution",
+          "resolved_by",
+          "resolved_at"
         ],
         "title": "ReconException",
         "type": "object"
@@ -2300,6 +2455,29 @@
       },
       "ReconRun": {
         "properties": {
+          "auto_resolved": {
+            "default": 0,
+            "title": "Auto Resolved",
+            "type": "integer"
+          },
+          "by_type": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Type",
+            "type": "object"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "exception_count": {
             "default": 0,
             "title": "Exception Count",
@@ -2315,7 +2493,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Finished At"
           },
           "id": {
@@ -2325,6 +2502,17 @@
           "matched": {
             "default": 0,
             "title": "Matched",
+            "type": "integer"
+          },
+          "new_exceptions": {
+            "default": 0,
+            "title": "New Exceptions",
+            "type": "integer"
+          },
+          "open_discrepancy": {
+            "default": 0,
+            "description": "Sum of |amount| of open exceptions",
+            "title": "Open Discrepancy",
             "type": "integer"
           },
           "payouts_checked": {
@@ -2369,9 +2557,41 @@
           "exception_count",
           "payouts_checked",
           "total_settled",
-          "status"
+          "status",
+          "by_type",
+          "new_exceptions",
+          "auto_resolved",
+          "open_discrepancy",
+          "error"
         ],
         "title": "ReconRun",
+        "type": "object"
+      },
+      "ReconSummary": {
+        "properties": {
+          "exceptions": {
+            "items": {
+              "$ref": "#/components/schemas/ReconException"
+            },
+            "title": "Exceptions",
+            "type": "array"
+          },
+          "run": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReconRun"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run",
+          "exceptions"
+        ],
+        "title": "ReconSummary",
         "type": "object"
       },
       "RejectRequest": {
@@ -3691,6 +3911,245 @@
         "summary": "Healthz",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/recon/exceptions/{exception_id}": {
+      "post": {
+        "description": "Analyst triage. These change Recoup's own records only (no money moves), so they don't\ngo through the policy gate; each one is audited.",
+        "operationId": "update_exception_recon_exceptions__exception_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "exception_id",
+            "required": true,
+            "schema": {
+              "title": "Exception Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExceptionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconException"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Exception",
+        "tags": [
+          "reconciliation"
+        ]
+      }
+    },
+    "/recon/payouts": {
+      "get": {
+        "description": "Payout -> balance transactions -> orders, annotated with exceptions (match view).",
+        "operationId": "payouts_recon_payouts_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PayoutView"
+                  },
+                  "title": "Response Payouts Recon Payouts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Payouts",
+        "tags": [
+          "reconciliation"
+        ]
+      }
+    },
+    "/recon/run": {
+      "post": {
+        "description": "'Run reconciliation now'. The same job the daily scheduler triggers.",
+        "operationId": "run_now_recon_run_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconRun"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Now",
+        "tags": [
+          "reconciliation"
+        ]
+      }
+    },
+    "/recon/summary": {
+      "get": {
+        "operationId": "summary_recon_summary_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "all",
+              "enum": [
+                "open",
+                "snoozed",
+                "resolved",
+                "expected",
+                "all"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Summary",
+        "tags": [
+          "reconciliation"
         ]
       }
     },

@@ -12,7 +12,13 @@ from typing import Any, TypeVar
 
 from pydantic import BaseModel
 
-from ..models import DisputeAnalysis, SourceRecord
+from ..models import (
+    DisputeAnalysis,
+    ExceptionExplanation,
+    ReconException,
+    ReconExplanations,
+    SourceRecord,
+)
 from ..playbooks import Facts, baseline_score, evaluate, playbook_for
 from .llm import FunctionCall, Turn
 from .narrative import deterministic_analysis
@@ -42,6 +48,9 @@ def facts_from_history(history: list[Turn]) -> Facts:
 class MockLLM:
     model_name = "mock-deterministic"
 
+    def _recon(self, history: list[Turn]) -> ReconExplanations:
+        return ReconExplanations(items=_recon_items(history))
+
     async def generate(self, system: str, history: list[Turn], tools: list[dict[str, Any]]) -> Turn:
         if any(t.role == "tool" for t in history):
             return Turn(role="model", text="I have the evidence I need.")
@@ -67,6 +76,8 @@ class MockLLM:
         return Turn(role="model", function_calls=calls[:6])
 
     async def generate_structured(self, system: str, history: list[Turn], schema: type[T]) -> T:
+        if schema is ReconExplanations:
+            return self._recon(history)  # type: ignore[return-value]
         if schema is not DisputeAnalysis:
             raise NotImplementedError(f"MockLLM can't produce {schema.__name__}")
         ctx = _context(history)
@@ -79,6 +90,33 @@ class MockLLM:
             facts, pb, checklist, baseline_score(pb, checklist), ctx.get("instruction")
         )
         return analysis  # type: ignore[return-value]
+
+
+def _recon_items(history: list[Turn]) -> list[ExceptionExplanation]:
+    from datetime import UTC, datetime
+
+    from .recon_explainer import template
+
+    items: list[ExceptionExplanation] = []
+    for t in history:
+        if t.role == "user" and t.text and (m := CONTEXT_RE.search(t.text)):
+            for f in json.loads(m.group(1)):
+                ex = ReconException(
+                    id=f["exception_id"],
+                    run_id="-",
+                    type=f["type"],
+                    amount=f["amount_cents"],
+                    refs=f["refs"],
+                    detail=f["detail"],
+                    detected_at=datetime.now(UTC),
+                )
+                expl, action = template(ex)
+                items.append(
+                    ExceptionExplanation(
+                        exception_id=ex.id, explanation=expl, suggested_action=action
+                    )
+                )
+    return items
 
 
 class ScriptedLLM:

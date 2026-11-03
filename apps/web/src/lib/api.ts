@@ -103,3 +103,19 @@ export const approveAction = (id: string, approval_token: string) =>
   post<ProposedAction>(`/actions/${encodeURIComponent(id)}/approve`, { approval_token });
 export const rejectAction = (id: string, reason?: string) =>
   post<ProposedAction>(`/actions/${encodeURIComponent(id)}/reject`, { reason: reason ?? null });
+
+export type ReconSummary = Schemas['ReconSummary'];
+export type ReconException = Schemas['ReconException'];
+export type ReconRun = Schemas['ReconRun'];
+export type PayoutView = Schemas['PayoutView'];
+export type ReconAction = Schemas['ExceptionUpdate']['action'];
+
+export const getReconSummary = (status = 'all') =>
+  api<ReconSummary>(`/recon/summary?status=${encodeURIComponent(status)}`);
+export const runRecon = () => post<ReconRun>('/recon/run');
+export const updateReconException = (id: string, action: ReconAction, note?: string) =>
+  post<ReconException>(`/recon/exceptions/${encodeURIComponent(id)}`, {
+    action,
+    note: note ?? null,
+  });
+export const getPayoutViews = () => api<PayoutView[]>('/recon/payouts');

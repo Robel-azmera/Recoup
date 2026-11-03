@@ -115,6 +115,11 @@ class ReconException(RecoupModel):
     status: ReconExceptionStatus = ReconExceptionStatus.open
     snoozed_until: datetime | None = None
     detected_at: datetime
+    last_seen_at: datetime | None = None
+    explained_by: str | None = None  # model name, or "template"
+    resolution: str | None = None
+    resolved_by: str | None = None
+    resolved_at: datetime | None = None
 
 
 class ReconRun(RecoupModel):
@@ -128,3 +133,10 @@ class ReconRun(RecoupModel):
     payouts_checked: int = 0
     total_settled: MinorUnits = 0
     status: str = "running"  # running | completed | failed
+    by_type: dict[str, int] = Field(default_factory=dict)
+    new_exceptions: int = 0
+    auto_resolved: int = 0
+    open_discrepancy: MinorUnits = Field(
+        default=0, description="Sum of |amount| of open exceptions"
+    )
+    error: str | None = None
