@@ -103,3 +103,72 @@ async def test_llm_failure_during_tool_loop_still_produces_a_grounded_draft(
         assert d.evidence_draft.unsupported_sentence_ids == []
     steps = [e.step for e in await container.audit.recent(limit=300, subject_id=disputes[0].id)]
     assert "agent.llm_fallback" in steps and "agent.completed" in steps
+
+
+async def test_network_errors_are_retried_then_become_llm_error() -> None:
+    import httpx
+
+    from app.agent.llm import with_retry
+
+    calls = {"n": 0}
+
+    async def flaky() -> str:
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise httpx.ConnectError("[Errno 11001] getaddrinfo failed")
+        return "ok"
+
+    async def no_sleep(_: float) -> None:
+        return None
+
+    assert await with_retry(flaky, sleep=no_sleep) == "ok"
+
+    async def down() -> str:
+        raise httpx.ConnectError("[Errno 11001] getaddrinfo failed")
+
+    with pytest.raises(LLMError, match="unreachable"):
+        await with_retry(down, sleep=no_sleep)
+
+
+async def test_poller_survives_a_network_error_at_startup(container: Container) -> None:
+    """Regression: a DNS failure on the first call used to kill the poller silently."""
+    import asyncio
+
+    import httpx
+
+    from app.integrations.notify import RealTelegram
+    from app.services import telegram_poller
+
+    class FlakyTelegram(RealTelegram):
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        async def call(self, method: str, **params: Any) -> Any:
+            self.calls.append(method)
+            if len(self.calls) == 1:
+                raise httpx.ConnectError("[Errno 11001] getaddrinfo failed")
+            return True
+
+        async def get_updates(self, offset: int | None, wait: int = 25) -> list[dict[str, Any]]:
+            self.calls.append("getUpdates")
+            await asyncio.sleep(0.01)
+            return []
+
+    tg = FlakyTelegram()
+    container.notifier.telegram = tg
+    real_sleep = asyncio.sleep
+
+    async def fast_sleep(s: float) -> None:
+        await real_sleep(0)
+
+    telegram_poller.asyncio.sleep = fast_sleep  # type: ignore[attr-defined]
+    try:
+        task = asyncio.create_task(telegram_poller.poll_forever(container))
+        for _ in range(50):
+            await real_sleep(0.01)
+            if "getUpdates" in tg.calls:
+                break
+        task.cancel()
+    finally:
+        telegram_poller.asyncio.sleep = real_sleep  # type: ignore[attr-defined]
+    assert tg.calls[:2] == ["deleteWebhook", "deleteWebhook"] and "getUpdates" in tg.calls

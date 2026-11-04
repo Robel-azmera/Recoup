@@ -104,16 +104,21 @@ REQUEST_TIMEOUT_S = 60  # a hung request is retried, then falls back
 async def with_retry(
     fn: Any, *, attempts: int = 4, base: float = 2.0, sleep: Any = asyncio.sleep
 ) -> Any:
-    """Retry on rate-limit / server errors with exponential backoff + jitter."""
+    """Retry on rate-limit / server / network errors with exponential backoff + jitter.
+    Everything that escapes is an LLMError, so callers can always fall back."""
+    import httpx
     from google.genai import errors
 
     for attempt in range(attempts):
         try:
             return await asyncio.wait_for(fn(), REQUEST_TIMEOUT_S)
-        except TimeoutError as e:
+        except (TimeoutError, httpx.TransportError) as e:  # hung request, DNS / connect failure
             if attempt == attempts - 1:
-                raise LLMError(f"Gemini timed out after {REQUEST_TIMEOUT_S}s") from e
-            log.warning("gemini timeout, retrying", extra={"fields": {"attempt": attempt}})
+                raise LLMError(f"Gemini unreachable: {type(e).__name__}: {e}") from e
+            log.warning(
+                "gemini network error, retrying",
+                extra={"fields": {"attempt": attempt, "error": type(e).__name__}},
+            )
             await sleep(base * 2**attempt)
         except errors.APIError as e:
             if e.code == 429 and "PerDay" in str(e):

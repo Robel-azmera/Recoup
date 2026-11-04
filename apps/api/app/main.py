@@ -25,7 +25,7 @@ from .routers import (
     webhooks,
 )
 from .routers import settings as settings_router
-from .services.telegram_poller import poll_forever, polling_enabled
+from .services.telegram_poller import on_poller_done, poll_forever, polling_enabled
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -36,6 +36,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         poller = asyncio.create_task(poll_forever(c)) if polling_enabled(c) else None
+        if poller:
+            poller.add_done_callback(on_poller_done)
         yield
         if poller:
             poller.cancel()
