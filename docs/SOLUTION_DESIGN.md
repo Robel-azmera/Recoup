@@ -39,13 +39,6 @@ The role breaks into six functions. Evidence assembly depends on order, fulfilme
 | Payout reconciliation | Match each payout to its balance transactions and orders; find missing settlements, fee anomalies, refunds without an order, and amount mismatches; report | Payouts, balance transactions, internal order ledger | 1–3 h daily or weekly |
 | Reporting | Win rate, dispute rate vs the network threshold (about 0.9% for Visa VDMP-style monitoring), $ recovered, open items | All of the above | 1–2 h weekly |
 
-### Prioritization
-
-The MVP ships W1 dispute defense and W3 reconciliation in full, because together they cover most of the dollars at stake. W2 and W4 come next because they are cheap and stop losses before they happen.
-
-prioritization · impact vs effort
-
-W1 is ranked highest: one recovered dispute can be worth more than a month of tooling. W6 and the real store adapters wait until the core loop is proven.
 
 ### Functional requirements
 
